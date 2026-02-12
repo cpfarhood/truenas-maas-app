@@ -74,9 +74,10 @@ RUN add-apt-repository -y ppa:maas/${MAAS_VERSION} && \
     bind9 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create maas user and group with specified UID/GID
-RUN groupadd -g ${MAAS_GID} ${MAAS_GROUP} || true && \
-    useradd -u ${MAAS_UID} -g ${MAAS_GID} -m -s /bin/bash ${MAAS_USER} && \
+# Modify MAAS user and group to use UID/GID 1000 (TrueNAS requirement)
+# MAAS package creates user/group during installation, so we modify them
+RUN groupmod -g ${MAAS_GID} ${MAAS_GROUP} && \
+    usermod -u ${MAAS_UID} -g ${MAAS_GID} -d /var/lib/maas -s /bin/bash ${MAAS_USER} && \
     # Add to sudo group for specific operations
     usermod -aG sudo ${MAAS_USER} && \
     # Configure passwordless sudo for specific MAAS commands
