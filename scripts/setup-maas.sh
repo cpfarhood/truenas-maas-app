@@ -35,7 +35,7 @@ prompt_input() {
 
     if [ "$secret" = "secret" ]; then
         read -sp "$prompt [$default]: " result
-        echo ""
+        echo "" >&2  # Print newline to stderr, not stdout
     else
         read -p "$prompt [$default]: " result
     fi
@@ -143,8 +143,6 @@ ADMIN_EMAIL=$(prompt_input "Enter admin email" "admin@example.com")
 echo ""
 echo "Admin password (leave empty to generate):"
 ADMIN_PASSWORD=$(prompt_input "Enter admin password" "" "secret")
-# Strip any trailing whitespace/newlines
-ADMIN_PASSWORD=$(echo -n "$ADMIN_PASSWORD")
 
 if [ -z "$ADMIN_PASSWORD" ]; then
     ADMIN_PASSWORD=$(generate_password)
@@ -156,8 +154,6 @@ fi
 echo ""
 echo "PostgreSQL password (leave empty to generate):"
 DB_PASSWORD=$(prompt_input "Enter database password" "" "secret")
-# Strip any trailing whitespace/newlines
-DB_PASSWORD=$(echo -n "$DB_PASSWORD")
 
 if [ -z "$DB_PASSWORD" ]; then
     DB_PASSWORD=$(generate_password)
