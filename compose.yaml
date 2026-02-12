@@ -18,8 +18,8 @@ services:
       context: .
       dockerfile: docker/postgres.Dockerfile
       args:
-        POSTGRES_UID: 1000
-        POSTGRES_GID: 1000
+        POSTGRES_UID: 568
+        POSTGRES_GID: 568
     image: ${POSTGRES_IMAGE_REPOSITORY:-truenas-maas-postgres}:${POSTGRES_IMAGE_TAG:-15}
     container_name: maas-postgres
     restart: unless-stopped
@@ -84,8 +84,8 @@ services:
       dockerfile: Dockerfile
       args:
         MAAS_VERSION: ${MAAS_VERSION:-3.5}
-        MAAS_UID: 1000
-        MAAS_GID: 1000
+        MAAS_UID: 568
+        MAAS_GID: 568
     image: ${IMAGE_REPOSITORY:-truenas-maas}:${IMAGE_TAG:-3.5}
     container_name: maas-region
     restart: unless-stopped

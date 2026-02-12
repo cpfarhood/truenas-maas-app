@@ -66,8 +66,8 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             MAAS_VERSION=3.5
-            MAAS_UID=1000
-            MAAS_GID=1000
+            MAAS_UID=568
+            MAAS_GID=568
 
   build-postgres:
     name: Build PostgreSQL Image
