@@ -108,6 +108,19 @@ EOF
 create_admin_user() {
     log_info "Checking for MAAS admin user..."
 
+    # Validate required environment variables
+    if [ -z "${MAAS_ADMIN_PASSWORD}" ]; then
+        log_error "MAAS_ADMIN_PASSWORD is not set or empty"
+        log_error "Please set MAAS_ADMIN_PASSWORD in your .env file"
+        return 1
+    fi
+
+    if [ -z "${MAAS_ADMIN_EMAIL}" ]; then
+        log_error "MAAS_ADMIN_EMAIL is not set or empty"
+        log_error "Please set MAAS_ADMIN_EMAIL in your .env file"
+        return 1
+    fi
+
     # Check if admin user already exists
     if sudo maas-region shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); print(User.objects.filter(username='${MAAS_ADMIN_USERNAME:-admin}').exists())" 2>/dev/null | grep -q "True"; then
         log_info "Admin user '${MAAS_ADMIN_USERNAME:-admin}' already exists"
@@ -116,15 +129,25 @@ create_admin_user() {
 
     log_info "Creating MAAS admin user '${MAAS_ADMIN_USERNAME:-admin}'..."
 
-    # Create admin user
-    if sudo maas-region createadmin \
-        --username "${MAAS_ADMIN_USERNAME:-admin}" \
-        --password "${MAAS_ADMIN_PASSWORD}" \
-        --email "${MAAS_ADMIN_EMAIL}" \
-        --ssh-import ""; then
-        log_success "Admin user created successfully"
+    # Create admin user using Django shell for better password handling
+    # This approach avoids issues with special characters in passwords
+    local create_user_script="
+from django.contrib.auth import get_user_model
+User = get_user_model()
+user = User.objects.create_superuser(
+    username='${MAAS_ADMIN_USERNAME:-admin}',
+    email='${MAAS_ADMIN_EMAIL}',
+    password='${MAAS_ADMIN_PASSWORD}'
+)
+print('Admin user created successfully')
+"
+
+    if echo "$create_user_script" | sudo maas-region shell 2>&1 | grep -q "Admin user created successfully"; then
+        log_success "Admin user '${MAAS_ADMIN_USERNAME:-admin}' created successfully"
+        log_info "Email: ${MAAS_ADMIN_EMAIL}"
     else
         log_error "Failed to create admin user"
+        log_error "Please check MAAS_ADMIN_PASSWORD and MAAS_ADMIN_EMAIL in your .env file"
         return 1
     fi
 
@@ -205,6 +228,39 @@ main() {
     log_info "TrueNAS MAAS Application"
     log_info "============================================"
 
+    # Validate required environment variables
+    local validation_failed=0
+
+    if [ -z "${MAAS_URL}" ]; then
+        log_error "MAAS_URL is not set"
+        validation_failed=1
+    fi
+
+    if [ -z "${MAAS_ADMIN_PASSWORD}" ]; then
+        log_error "MAAS_ADMIN_PASSWORD is not set or empty"
+        validation_failed=1
+    fi
+
+    if [ -z "${MAAS_ADMIN_EMAIL}" ]; then
+        log_error "MAAS_ADMIN_EMAIL is not set or empty"
+        validation_failed=1
+    fi
+
+    if [ -z "${POSTGRES_PASSWORD}" ]; then
+        log_error "POSTGRES_PASSWORD is not set or empty"
+        validation_failed=1
+    fi
+
+    if [ "$validation_failed" = "1" ]; then
+        log_error "Required environment variables are missing!"
+        log_error "Please check your .env file and ensure all required variables are set:"
+        log_error "  - MAAS_URL"
+        log_error "  - MAAS_ADMIN_PASSWORD"
+        log_error "  - MAAS_ADMIN_EMAIL"
+        log_error "  - POSTGRES_PASSWORD"
+        exit 1
+    fi
+
     # Display configuration
     log_info "Configuration:"
     log_info "  - MAAS URL: ${MAAS_URL}"
@@ -214,6 +270,7 @@ main() {
     log_info "  - Database Name: ${POSTGRES_DB:-maasdb}"
     log_info "  - Database User: ${POSTGRES_USER:-maas}"
     log_info "  - Debug Mode: ${MAAS_DEBUG:-false}"
+    log_info "  - Admin Password: [SET]"
 
     # Wait for PostgreSQL
     if ! wait_for_postgres; then
