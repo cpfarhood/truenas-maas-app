@@ -15,7 +15,7 @@ This document summarizes the production-ready Docker Compose configuration creat
 
 **Services:**
 - **postgres**: PostgreSQL 15 Alpine database
-  - Non-root execution (uid/gid 1000)
+  - Non-root execution (uid/gid 568)
   - Comprehensive health checks
   - Persistent data volumes
   - Log rotation configured
@@ -23,7 +23,7 @@ This document summarizes the production-ready Docker Compose configuration creat
   - Internal network isolation
 
 - **maas**: MAAS region controller
-  - Non-root execution (uid/gid 1000)
+  - Non-root execution (uid/gid 568)
   - Host or bridge network mode support
   - Required Linux capabilities (NET_ADMIN, NET_RAW, NET_BIND_SERVICE)
   - Comprehensive health checks
@@ -34,7 +34,7 @@ This document summarizes the production-ready Docker Compose configuration creat
 
 **Key Features:**
 - ✅ TrueNAS 25.10+ compatible (includes `services:` key)
-- ✅ All containers run as non-root (uid/gid 1000)
+- ✅ All containers run as non-root (uid/gid 568)
 - ✅ Comprehensive health checks with proper intervals
 - ✅ Host path volumes (production-ready)
 - ✅ Environment variable templating with defaults
@@ -165,7 +165,7 @@ This document summarizes the production-ready Docker Compose configuration creat
 **Features:**
 - Color-coded output (green/yellow/red)
 - Detailed error messages with solutions
-- Permission checking (uid/gid 1000)
+- Permission checking (uid/gid 568)
 - Disk space verification
 - Port conflict detection
 - Summary report with pass/fail status
@@ -184,7 +184,7 @@ This document summarizes the production-ready Docker Compose configuration creat
 **Features:**
 - Interactive prompts for all configuration
 - Automatic directory creation
-- Permission setting (uid/gid 1000)
+- Permission setting (uid/gid 568)
 - Network configuration detection
 - Password generation (secure random passwords)
 - Automatic .env file creation
@@ -213,7 +213,7 @@ This document summarizes the production-ready Docker Compose configuration creat
 
 ✅ **All Requirements Met:**
 - `services:` key present in compose.yaml
-- Non-root containers (uid/gid 1000)
+- Non-root containers (uid/gid 568)
 - Host path volumes (not ixVolumes)
 - Comprehensive health checks implemented
 - Restart policies configured (`unless-stopped`)
@@ -224,7 +224,7 @@ This document summarizes the production-ready Docker Compose configuration creat
 ### Security Hardening
 
 **Container Security:**
-- ✅ Non-root execution (uid/gid 1000)
+- ✅ Non-root execution (uid/gid 568)
 - ✅ Minimal capabilities (NET_ADMIN, NET_RAW, NET_BIND_SERVICE only)
 - ✅ Dropped unnecessary capabilities
 - ✅ `no-new-privileges` security option
@@ -324,7 +324,7 @@ http://<truenas-ip>:5240/MAAS
 
 ### TrueNAS Best Practices
 1. ✅ Host path volumes (production-ready)
-2. ✅ Non-root execution (uid/gid 1000)
+2. ✅ Non-root execution (uid/gid 568)
 3. ✅ Dataset structure documented
 4. ✅ Permission management automated
 5. ✅ Storage requirements calculated
@@ -412,7 +412,7 @@ truenas-maas-app/
 ### TrueNAS 25.10+ Requirements
 ✅ All mandatory requirements satisfied:
 - [x] compose.yaml includes `services:` key
-- [x] All containers run as non-root (uid/gid 1000)
+- [x] All containers run as non-root (uid/gid 568)
 - [x] Host path volumes used (not ixVolumes)
 - [x] Health checks implemented for all services
 - [x] Restart policies configured appropriately

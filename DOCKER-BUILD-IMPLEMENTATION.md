@@ -10,7 +10,7 @@ This document describes the implementation of a custom Docker container for MAAS
 ## Objectives
 
 1. Create a TrueNAS 25.10+ compliant MAAS container
-2. Run as non-root user (UID/GID 1000)
+2. Run as non-root user (UID/GID 568)
 3. Implement comprehensive health checks
 4. Optimize for container environment
 5. Provide intelligent initialization and error handling
@@ -26,7 +26,7 @@ This document describes the implementation of a custom Docker container for MAAS
 **Key Features**:
 - Ubuntu 22.04 LTS base (MAAS recommended)
 - MAAS 3.5 from official PPA
-- Non-root user operation (maas:1000:1000)
+- Non-root user operation (maas:568:568)
 - All required dependencies (PostgreSQL client, nginx, bind9, squid)
 - Proper directory permissions for non-root access
 - Optimized layer caching
@@ -204,7 +204,7 @@ maas:
 ## TrueNAS 25.10+ Compliance
 
 ### Non-Root Operation ✓
-- Runs as UID/GID 1000:1000
+- Runs as UID/GID 568:568
 - All directories pre-configured with correct ownership
 - No privilege escalation required
 - Sudo configured only for specific MAAS commands
@@ -269,7 +269,7 @@ cp .env.example .env
 
 # 3. Create storage directories
 mkdir -p /mnt/tank/maas/{config,data,images,logs,tmp,postgres}
-chown -R 1000:1000 /mnt/tank/maas/
+chown -R 568:568 /mnt/tank/maas/
 chmod -R 755 /mnt/tank/maas/
 
 # 4. Build and start
@@ -317,7 +317,7 @@ docker compose logs -f maas
 - ✓ Non-root operation confirmed
 
 ### Security Testing
-- ✓ Runs as UID 1000
+- ✓ Runs as UID 568
 - ✓ No unnecessary capabilities
 - ✓ Security options applied
 - ✓ No privilege escalation possible
@@ -364,7 +364,7 @@ docker compose exec maas curl http://localhost:5240/MAAS/api/2.0/version/
 **Issue**: Permission denied errors
 ```bash
 # Fix volume permissions
-sudo chown -R 1000:1000 /mnt/tank/maas/
+sudo chown -R 568:568 /mnt/tank/maas/
 sudo chmod -R 755 /mnt/tank/maas/
 ```
 

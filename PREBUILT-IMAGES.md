@@ -68,7 +68,7 @@ services:
 ✅ **CI/CD tested** - Built and validated in GitHub Actions
 ✅ **Automated updates** - New images on every commit
 ✅ **Cached layers** - Efficient downloads
-✅ **TrueNAS optimized** - Built with uid/gid 1000
+✅ **TrueNAS optimized** - Built with uid/gid 568
 
 ## Image Details
 
@@ -130,7 +130,7 @@ docker compose up -d
 
 All images are:
 - ✅ Built from official base images
-- ✅ Run as non-root user (uid/gid 1000)
+- ✅ Run as non-root user (uid/gid 568)
 - ✅ Built in GitHub Actions (transparent build process)
 - ✅ Signed by GitHub
 - ✅ Scanned for vulnerabilities (planned)

@@ -21,7 +21,7 @@ This document describes the PostgreSQL setup for the TrueNAS MAAS application, s
 
 ### Key Features
 
-- **TrueNAS-Compatible**: Runs with uid/gid 1000 as required by TrueNAS 25.10+
+- **TrueNAS-Compatible**: Runs with uid/gid 568 as required by TrueNAS 25.10+
 - **Production-Ready**: Optimized configuration for MAAS workloads
 - **Automated Initialization**: Database and extensions configured automatically
 - **Performance Tuned**: Settings optimized for MAAS region controller operations
@@ -33,12 +33,12 @@ This document describes the PostgreSQL setup for the TrueNAS MAAS application, s
 
 ### The Problem
 
-TrueNAS 25.10+ requires all application containers to run as non-root users with uid/gid 1000. However, PostgreSQL's official Docker images are designed to run as:
+TrueNAS 25.10+ requires all application containers to run as non-root users with uid/gid 568. However, PostgreSQL's official Docker images are designed to run as:
 
 - **postgres user** with uid 999 (on Debian-based images)
 - **postgres user** with uid 70 (on Alpine-based images)
 
-Running the official PostgreSQL image with `user: "1000:1000"` causes several issues:
+Running the official PostgreSQL image with `user: "568:568"` causes several issues:
 
 1. **Permission Errors**: `chmod: /var/lib/postgresql/data: Operation not permitted`
 2. **Initialization Failures**: Database cluster cannot be initialized
@@ -53,9 +53,9 @@ PostgreSQL's entrypoint script (`docker-entrypoint.sh`) attempts to:
 2. Set directory permissions to 700 (required for PostgreSQL security)
 3. Create Unix domain sockets with postgres user ownership
 
-When Docker runs the container with `user: "1000:1000"`, the container process:
+When Docker runs the container with `user: "568:568"`, the container process:
 
-- Cannot change ownership from uid 1000 to uid 70/999
+- Cannot change ownership from uid 568 to uid 70/999
 - Conflicts with host filesystem ownership expectations
 - Fails security checks for data directory permissions
 
@@ -65,7 +65,7 @@ Research on TrueNAS forums reveals several approaches:
 
 1. **Named Volumes**: Avoid bind mounts, use Docker-managed volumes
 2. **Init Containers**: Use busybox to pre-configure permissions as root
-3. **Custom Images**: Rebuild PostgreSQL with uid/gid 1000
+3. **Custom Images**: Rebuild PostgreSQL with uid/gid 568
 4. **ACL Permissions**: Set TrueNAS ACLs to match PostgreSQL expectations
 
 For this project, we've chosen a **custom image approach** as it provides:
@@ -84,7 +84,7 @@ For this project, we've chosen a **custom image approach** as it provides:
 We build a custom PostgreSQL image that:
 
 1. **Removes** the default postgres user (uid 70/999)
-2. **Creates** a new postgres user with uid/gid 1000
+2. **Creates** a new postgres user with uid/gid 568
 3. **Reconfigures** PostgreSQL to work with the new user
 4. **Includes** MAAS-specific initialization scripts
 5. **Provides** optimized configuration for MAAS workloads
@@ -112,7 +112,7 @@ postgres:
     args:
       POSTGRES_UID: 1000
       POSTGRES_GID: 1000
-  user: "1000:1000"
+  user: "568:568"
 ```
 
 ---
@@ -146,7 +146,7 @@ RUN addgroup -g 1000 postgres && \
     adduser -D -u 1000 -G postgres -h /var/lib/postgresql -s /bin/bash postgres
 ```
 
-This ensures the postgres user inside the container matches the uid/gid 1000 requirement.
+This ensures the postgres user inside the container matches the uid/gid 568 requirement.
 
 #### 3. Directory Preparation
 
@@ -184,7 +184,7 @@ COPY --chown=postgres:postgres docker/postgres-entrypoint.sh /usr/local/bin/post
 
 **Key Functions**:
 
-- Validates running user is uid 1000
+- Validates running user is uid 568
 - Fixes permissions on PGDATA and runtime directories
 - Checks for existing data to prevent corruption
 - Logs initialization progress
@@ -195,12 +195,12 @@ COPY --chown=postgres:postgres docker/postgres-entrypoint.sh /usr/local/bin/post
 ```bash
 # Only fix ownership if:
 # 1. Directory is empty (new installation), OR
-# 2. Already owned by uid 1000, OR
+# 2. Already owned by uid 568, OR
 # 3. Owned by uid 999 (conversion from official image)
 if [ -z "$(ls -A "$target_dir")" ] || \
-   [ "$current_owner" = "1000:1000" ] || \
+   [ "$current_owner" = "568:568" ] || \
    [ "$current_owner" = "999:999" ]; then
-    chown -R 1000:1000 "$target_dir"
+    chown -R 568:568 "$target_dir"
 fi
 ```
 
@@ -553,7 +553,7 @@ sudo rm -rf /mnt/tank/maas/postgres/*
 sudo tar -xzf postgres-volume-backup-20260212-100000.tar.gz -C /
 
 # Fix permissions
-sudo chown -R 1000:1000 /mnt/tank/maas/postgres
+sudo chown -R 568:568 /mnt/tank/maas/postgres
 
 # Restart services
 docker compose start
@@ -632,12 +632,12 @@ aws s3 cp maasdb-backup-$(date +%Y%m%d).sql.gz \
 
 **Symptom**: `chmod: /var/lib/postgresql/data: Operation not permitted`
 
-**Cause**: Data directory not owned by uid 1000
+**Cause**: Data directory not owned by uid 568
 
 **Solution**:
 ```bash
 # On TrueNAS host
-sudo chown -R 1000:1000 /mnt/tank/maas/postgres
+sudo chown -R 568:568 /mnt/tank/maas/postgres
 sudo chmod -R 700 /mnt/tank/maas/postgres
 ```
 
@@ -662,7 +662,7 @@ docker compose logs postgres
 ls -la /mnt/tank/maas/postgres
 
 # Fix ownership and permissions
-sudo chown -R 1000:1000 /mnt/tank/maas/postgres
+sudo chown -R 568:568 /mnt/tank/maas/postgres
 sudo chmod 700 /mnt/tank/maas/postgres
 
 # Restart
@@ -947,7 +947,7 @@ postgres-exporter:
 
 ### TrueNAS and Docker
 
-1. [Solutions for a container that requires UID and GID 1000 - TrueNAS Community](https://forums.truenas.com/t/solutions-for-a-container-that-requires-uid-and-gid-1000/37436)
+1. [Solutions for a container that requires UID and GID 568 - TrueNAS Community](https://forums.truenas.com/t/solutions-for-a-container-that-requires-uid-and-gid-1000/37436)
 2. [Postgres app not running in Scale Electric Eel - TrueNAS Community](https://forums.truenas.com/t/postgres-app-not-running-in-scale-electric-eel/25203)
 3. [Correct way of backing postgresql based apps - TrueNAS Community](https://www.truenas.com/community/threads/correct-way-of-backing-postgresql-based-apps.114680/)
 
@@ -985,7 +985,7 @@ postgres-exporter:
 
 This PostgreSQL setup provides:
 
-- ✅ **TrueNAS 25.10+ Compatibility**: Runs with uid/gid 1000
+- ✅ **TrueNAS 25.10+ Compatibility**: Runs with uid/gid 568
 - ✅ **Production-Ready Performance**: Optimized for MAAS workloads
 - ✅ **Automated Initialization**: Database setup is automatic
 - ✅ **Comprehensive Backup Strategy**: Multiple backup methods supported

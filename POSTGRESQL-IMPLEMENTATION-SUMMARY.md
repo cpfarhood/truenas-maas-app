@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document summarizes the PostgreSQL implementation for the TrueNAS MAAS application, addressing the non-root user (uid/gid 1000) requirement while maintaining proper PostgreSQL functionality.
+This document summarizes the PostgreSQL implementation for the TrueNAS MAAS application, addressing the non-root user (uid/gid 568) requirement while maintaining proper PostgreSQL functionality.
 
 **Implementation Date**: 2026-02-12
 **Status**: Complete
@@ -12,12 +12,12 @@ This document summarizes the PostgreSQL implementation for the TrueNAS MAAS appl
 
 ## Problem Statement
 
-TrueNAS 25.10+ requires all application containers to run as non-root users with uid/gid 1000. However, PostgreSQL's official Docker images expect to run as the `postgres` user with uid 70 (Alpine) or 999 (Debian), causing permission conflicts and initialization failures.
+TrueNAS 25.10+ requires all application containers to run as non-root users with uid/gid 568. However, PostgreSQL's official Docker images expect to run as the `postgres` user with uid 70 (Alpine) or 999 (Debian), causing permission conflicts and initialization failures.
 
 ### Issues Addressed
 
 1. **Permission Errors**: `chmod: /var/lib/postgresql/data: Operation not permitted`
-2. **Initialization Failures**: Database cluster cannot be initialized with uid 1000
+2. **Initialization Failures**: Database cluster cannot be initialized with uid 568
 3. **Runtime Errors**: PostgreSQL cannot access data directories
 4. **Socket Errors**: Unix domain sockets cannot be created with incorrect ownership
 
@@ -30,8 +30,8 @@ TrueNAS 25.10+ requires all application containers to run as non-root users with
 We implemented a **custom PostgreSQL Docker image** that:
 
 1. Removes the default postgres user (uid 70/999)
-2. Creates a new postgres user with uid/gid 1000
-3. Reconfigures all PostgreSQL directories for uid 1000
+2. Creates a new postgres user with uid/gid 568
+3. Reconfigures all PostgreSQL directories for uid 568
 4. Includes MAAS-specific initialization scripts
 5. Provides performance-tuned configuration
 
@@ -61,10 +61,10 @@ We implemented a **custom PostgreSQL Docker image** that:
 
 #### `/Users/cpfarhood/Documents/Repositories/truenas-maas-app/docker/postgres.Dockerfile`
 - **Size**: 69 lines
-- **Purpose**: Custom PostgreSQL 15 Alpine image with uid/gid 1000 support
+- **Purpose**: Custom PostgreSQL 15 Alpine image with uid/gid 568 support
 - **Key Features**:
   - Removes default postgres user
-  - Creates postgres user with uid 1000
+  - Creates postgres user with uid 568
   - Sets up proper directory ownership
   - Includes initialization and configuration scripts
 
@@ -72,7 +72,7 @@ We implemented a **custom PostgreSQL Docker image** that:
 - **Size**: 84 lines
 - **Purpose**: Wrapper around official PostgreSQL entrypoint
 - **Key Features**:
-  - Validates running user is uid 1000
+  - Validates running user is uid 568
   - Fixes permissions on PGDATA and runtime directories
   - Prevents data corruption on existing installations
   - Provides detailed logging for troubleshooting
@@ -175,7 +175,7 @@ FROM postgres:15-alpine
 # 2. Remove default postgres user (uid 70)
 RUN deluser postgres && delgroup postgres
 
-# 3. Create postgres user with uid/gid 1000
+# 3. Create postgres user with uid/gid 568
 RUN addgroup -g 1000 postgres && \
     adduser -D -u 1000 -G postgres postgres
 
@@ -199,13 +199,13 @@ The custom entrypoint handles permission edge cases:
 ```bash
 # Only fix permissions if:
 # 1. Directory is empty (new installation)
-# 2. Already owned by uid 1000 (correct)
+# 2. Already owned by uid 568 (correct)
 # 3. Owned by uid 999 (migration from official image)
 
 if [ -z "$(ls -A "$PGDATA")" ] || \
-   [ "$current_owner" = "1000:1000" ] || \
+   [ "$current_owner" = "568:568" ] || \
    [ "$current_owner" = "999:999" ]; then
-    chown -R 1000:1000 "$PGDATA"
+    chown -R 568:568 "$PGDATA"
 else
     # Prevent data corruption on unexpected ownership
     log "Warning: Unexpected ownership, skipping automatic fix"
@@ -261,8 +261,8 @@ max_connections = 100
 
 ### TrueNAS and Non-Root Users
 
-1. [Solutions for a container that requires UID and GID 1000 - TrueNAS Community Forums](https://forums.truenas.com/t/solutions-for-a-container-that-requires-uid-and-gid-1000/37436)
-   - **Key Finding**: TrueNAS 25.10+ requires uid/gid 1000 or higher for security
+1. [Solutions for a container that requires UID and GID 568 - TrueNAS Community Forums](https://forums.truenas.com/t/solutions-for-a-container-that-requires-uid-and-gid-1000/37436)
+   - **Key Finding**: TrueNAS 25.10+ requires uid/gid 568 or higher for security
 
 2. [Postgres app not running in Scale Electric Eel - TrueNAS Community](https://forums.truenas.com/t/postgres-app-not-running-in-scale-electric-eel/25203)
    - **Key Finding**: PostgreSQL uid 999 conflicts with TrueNAS built-in Docker uid
@@ -326,7 +326,7 @@ max_connections = 100
 ```bash
 # Create storage directories
 sudo mkdir -p /mnt/tank/maas/postgres
-sudo chown -R 1000:1000 /mnt/tank/maas/postgres
+sudo chown -R 568:568 /mnt/tank/maas/postgres
 sudo chmod 700 /mnt/tank/maas/postgres
 ```
 
@@ -387,7 +387,7 @@ docker compose logs maas | grep -i database
 ### 1. Permission Testing
 
 ```bash
-# Verify uid/gid 1000 is running PostgreSQL
+# Verify uid/gid 568 is running PostgreSQL
 docker exec maas-postgres id
 
 # Check data directory ownership
@@ -563,7 +563,7 @@ See **POSTGRESQL-SETUP.md** "Troubleshooting" section for:
 
 This PostgreSQL implementation successfully addresses the TrueNAS 25.10+ non-root user requirement while maintaining:
 
-✅ **Security**: Runs as uid/gid 1000 as required
+✅ **Security**: Runs as uid/gid 568 as required
 ✅ **Performance**: Optimized configuration for MAAS workloads
 ✅ **Reliability**: Proper initialization and error handling
 ✅ **Maintainability**: Comprehensive documentation and tooling

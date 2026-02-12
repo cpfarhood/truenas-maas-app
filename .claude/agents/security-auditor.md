@@ -41,7 +41,7 @@ You are a senior security auditor specializing in container security, infrastruc
 ### Security Checklist
 
 **Container Configuration:**
-- ✅ All containers run as non-root (uid/gid 1000)
+- ✅ All containers run as non-root (uid/gid 568)
 - ✅ No privileged containers
 - ✅ Capabilities dropped to minimum required
 - ✅ Read-only root filesystem where possible

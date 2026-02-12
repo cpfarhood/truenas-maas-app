@@ -31,7 +31,7 @@ ls -lh docker/postgres* scripts/*postgres*.sh
 ### Configuration Verification
 
 - [ ] `compose.yaml` has custom PostgreSQL build configuration
-- [ ] `compose.yaml` specifies `user: "1000:1000"` for postgres service
+- [ ] `compose.yaml` specifies `user: "568:568"` for postgres service
 - [ ] `compose.yaml` includes `shm_size: 256mb` for postgres service
 - [ ] `.env.example` includes PostgreSQL-specific variables
 - [ ] POSTGRES_PASSWORD is set in `.env` file (not committed to git)
@@ -42,7 +42,7 @@ grep -A 10 "postgres:" compose.yaml | grep -E "(build:|user:|shm_size:)"
 grep POSTGRES .env.example
 ```
 
-**Expected Result**: Build configuration, user 1000:1000, and shm_size present
+**Expected Result**: Build configuration, user 568:568, and shm_size present
 
 ---
 
@@ -85,8 +85,8 @@ truenas-maas-postgres   15      <image_id>   <timestamp>   ~150MB
 
 ### Image Inspection
 
-- [ ] Postgres user exists with uid 1000
-- [ ] Postgres group exists with gid 1000
+- [ ] Postgres user exists with uid 568
+- [ ] Postgres group exists with gid 568
 - [ ] Required directories exist: `/var/lib/postgresql/data`, `/var/run/postgresql`
 - [ ] Custom scripts are present in image
 - [ ] Entrypoint is set correctly
@@ -110,14 +110,14 @@ docker run --rm truenas-maas-postgres:15 ls -la /usr/local/bin/postgres-entrypoi
 ### Storage Preparation
 
 - [ ] PostgreSQL data directory created: `/mnt/tank/maas/postgres` (or configured path)
-- [ ] Directory owned by uid/gid 1000:1000
+- [ ] Directory owned by uid/gid 568:1000
 - [ ] Directory permissions set to 700
 - [ ] At least 20GB free space available
 
 **Validation Command**:
 ```bash
 sudo mkdir -p /mnt/tank/maas/postgres
-sudo chown -R 1000:1000 /mnt/tank/maas/postgres
+sudo chown -R 568:568 /mnt/tank/maas/postgres
 sudo chmod 700 /mnt/tank/maas/postgres
 df -h /mnt/tank/maas/postgres
 ```
@@ -326,7 +326,7 @@ docker exec -t maas-postgres psql -U maas -d maasdb -c "SELECT * FROM restore_te
 
 ### User Permissions
 
-- [ ] PostgreSQL runs as uid 1000 (verified with `id`)
+- [ ] PostgreSQL runs as uid 568 (verified with `id`)
 - [ ] Non-root user confirmed
 - [ ] Cannot escalate to root
 - [ ] File permissions are restrictive (700 for data directory)

@@ -43,7 +43,7 @@ cp .env.example .env
 
 # Create storage directories
 sudo mkdir -p /mnt/tank/maas/{config,data,images,logs,tmp,postgres}
-sudo chown -R 1000:1000 /mnt/tank/maas/
+sudo chown -R 568:568 /mnt/tank/maas/
 sudo chmod -R 755 /mnt/tank/maas/
 ```
 
@@ -148,7 +148,7 @@ docker compose exec maas pg_isready -h postgres -p 5432 -U maas
 
 ### 3. Permission Tests
 ```bash
-# Verify running as UID 1000
+# Verify running as UID 568
 docker compose exec maas id
 
 # Check file permissions

@@ -11,7 +11,7 @@ This document compares the custom TrueNAS-optimized MAAS build with the upstream
 | Feature | Upstream (maasio/maas) | Custom Build |
 |---------|----------------------|--------------|
 | Base Image | Ubuntu (unspecified) | Ubuntu 22.04 LTS (explicit) |
-| User/Group | root or varied | maas (1000:1000) - fixed |
+| User/Group | root or varied | maas (568:568) - fixed |
 | Init System | Varies | Bash entrypoint |
 | Documentation | Limited | Comprehensive |
 

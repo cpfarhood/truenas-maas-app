@@ -11,7 +11,7 @@ name: maas
 services:
   # PostgreSQL Database Service
   # Provides persistent data storage for MAAS region controller
-  # Custom build with uid/gid 1000 support for TrueNAS 25.10+
+  # Custom build with uid/gid 568 support for TrueNAS 25.10+
   postgres:
     # Build custom PostgreSQL image with TrueNAS-compatible uid/gid
     build:
@@ -25,7 +25,7 @@ services:
     restart: unless-stopped
 
     # Run as non-root user (TrueNAS 25.10+ requirement)
-    user: "1000:1000"
+    user: "568:568"
 
     # Environment configuration
     environment:
@@ -87,7 +87,7 @@ services:
     restart: unless-stopped
 
     # Run as non-root user (TrueNAS 25.10+ requirement)
-    user: "1000:1000"
+    user: "568:568"
 
     # Network configuration
     # IMPORTANT: For PXE boot functionality, MAAS requires host network mode
@@ -258,7 +258,7 @@ volumes:
 #
 # PostgreSQL Configuration:
 #   This application uses a custom PostgreSQL image to support TrueNAS 25.10+ requirements.
-#   The custom image runs PostgreSQL with uid/gid 1000, resolving the non-root user conflict.
+#   The custom image runs PostgreSQL with uid/gid 568, resolving the non-root user conflict.
 #   For details, see: POSTGRESQL-SETUP.md
 #
 # Required Environment Variables:
@@ -291,7 +291,7 @@ volumes:
 # Pre-Installation Steps:
 #   1. Create storage directories with proper ownership:
 #      mkdir -p /mnt/tank/maas/{config,data,images,logs,tmp,postgres}
-#      chown -R 1000:1000 /mnt/tank/maas/
+#      chown -R 568:568 /mnt/tank/maas/
 #      chmod -R 755 /mnt/tank/maas/
 #
 #   2. Create .env file with required variables:

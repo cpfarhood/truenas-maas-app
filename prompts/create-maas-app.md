@@ -225,7 +225,7 @@ capabilities:
 
 **Key Considerations:**
 - Use semantic versioning for both `version` (app package) and `app_version` (MAAS software)
-- Set `run_as_context` to non-root user (uid/gid 1000) unless MAAS absolutely requires root
+- Set `run_as_context` to non-root user (uid/gid 568) unless MAAS absolutely requires root
 - Include comprehensive keywords for discoverability in the app catalog
 - Provide high-quality screenshots (1280x720 or higher) for the app gallery
 - Use the `community` train for initial development, graduate to `stable` after testing
@@ -680,7 +680,7 @@ MAAS is licensed under AGPL-3.0. This TrueNAS app integration is licensed under 
    - Ensure UID/GID match between container and host
    - Set appropriate directory ownership before deployment:
      ```bash
-     chown -R 1000:1000 /mnt/pool/apps/maas/
+     chown -R 568:568 /mnt/pool/apps/maas/
      ```
 
 4. **Storage Requirements**
@@ -740,7 +740,7 @@ MAAS is licensed under AGPL-3.0. This TrueNAS app integration is licensed under 
 
 1. **Run as Non-Root**
    ```yaml
-   user: "1000:1000"  # Non-root UID/GID
+   user: "568:568"  # Non-root UID/GID
    ```
 
 2. **Limit Capabilities**

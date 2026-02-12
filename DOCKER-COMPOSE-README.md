@@ -9,7 +9,7 @@ This Docker Compose configuration deploys a production-ready MAAS environment co
 - **MAAS Region Controller**: Web UI, API, and infrastructure management
 - **PostgreSQL Database**: Persistent data storage for MAAS
 
-Both services run as non-root (uid/gid 1000) and include comprehensive health checks, logging, and security hardening.
+Both services run as non-root (uid/gid 568) and include comprehensive health checks, logging, and security hardening.
 
 ## Prerequisites
 
@@ -49,8 +49,8 @@ Create the required storage directories on your TrueNAS pool:
 # Create all directories
 sudo mkdir -p /mnt/tank/maas/{config,data,images,logs,tmp,postgres}
 
-# Set ownership to uid/gid 1000 (required for non-root containers)
-sudo chown -R 1000:1000 /mnt/tank/maas/
+# Set ownership to uid/gid 568 (required for non-root containers)
+sudo chown -R 568:568 /mnt/tank/maas/
 
 # Set permissions
 sudo chmod -R 755 /mnt/tank/maas/
@@ -398,7 +398,7 @@ tar -xzf "${BACKUP_PATH}_volumes.tar.gz" -C /
 # tar -xzf "${BACKUP_PATH}_images.tar.gz" -C /
 
 # Fix permissions
-chown -R 1000:1000 /mnt/tank/maas/
+chown -R 568:568 /mnt/tank/maas/
 
 # Start all services
 docker compose up -d
@@ -427,7 +427,7 @@ docker compose logs
 ls -la /mnt/tank/maas/
 
 # Fix permissions
-sudo chown -R 1000:1000 /mnt/tank/maas/
+sudo chown -R 568:568 /mnt/tank/maas/
 
 # Check for port conflicts
 netstat -tuln | grep -E '5240|69'
@@ -505,7 +505,7 @@ ls -la /mnt/tank/maas/
 
 **Fix ownership:**
 ```bash
-sudo chown -R 1000:1000 /mnt/tank/maas/
+sudo chown -R 568:568 /mnt/tank/maas/
 sudo chmod -R 755 /mnt/tank/maas/
 ```
 

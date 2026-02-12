@@ -88,7 +88,7 @@ This repository includes 12 specialized agents in `.claude/agents/` for differen
 ## TrueNAS App Development
 
 ### Docker Compose Requirements
-- All containers must run as non-root (uid/gid 1000)
+- All containers must run as non-root (uid/gid 568)
 - Include `services:` key in compose.yaml (TrueNAS 25.10+ requirement)
 - Use host path volumes (NOT ixVolumes): `/mnt/poolname/appname/`
 - Implement health checks for all services

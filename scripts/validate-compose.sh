@@ -114,10 +114,10 @@ if [ -f "$ENV_FILE" ]; then
         if [ ! -d "$path" ]; then
             MISSING_PATHS+=("$path")
         else
-            # Check ownership (should be 1000:1000)
+            # Check ownership (should be 568:568)
             OWNER=$(stat -c '%u:%g' "$path" 2>/dev/null || stat -f '%u:%g' "$path" 2>/dev/null || echo "unknown")
-            if [ "$OWNER" != "1000:1000" ] && [ "$OWNER" != "unknown" ]; then
-                WRONG_PERMISSIONS+=("$path (owner: $OWNER, should be 1000:1000)")
+            if [ "$OWNER" != "568:568" ] && [ "$OWNER" != "unknown" ]; then
+                WRONG_PERMISSIONS+=("$path (owner: $OWNER, should be 568:568)")
             fi
         fi
     done
@@ -133,7 +133,7 @@ if [ -f "$ENV_FILE" ]; then
             echo ""
             echo "Create with:"
             echo "  sudo mkdir -p ${STORAGE_PATHS[@]}"
-            echo "  sudo chown -R 1000:1000 /mnt/tank/maas/"
+            echo "  sudo chown -R 568:568 /mnt/tank/maas/"
         fi
 
         if [ ${#WRONG_PERMISSIONS[@]} -gt 0 ]; then
@@ -143,7 +143,7 @@ if [ -f "$ENV_FILE" ]; then
             done
             echo ""
             echo "Fix with:"
-            echo "  sudo chown -R 1000:1000 /mnt/tank/maas/"
+            echo "  sudo chown -R 568:568 /mnt/tank/maas/"
         fi
     fi
 else

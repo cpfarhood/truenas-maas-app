@@ -64,9 +64,9 @@ This checklist ensures all prerequisites are met before deploying MAAS on TrueNA
   mkdir -p /mnt/tank/maas/{config,data,images,logs,tmp,postgres}
   ```
 
-- [ ] **Permissions Set**: Directories owned by uid/gid 1000
+- [ ] **Permissions Set**: Directories owned by uid/gid 568
   ```bash
-  sudo chown -R 1000:1000 /mnt/tank/maas/
+  sudo chown -R 568:568 /mnt/tank/maas/
   sudo chmod -R 755 /mnt/tank/maas/
   ```
 
@@ -258,7 +258,7 @@ This checklist ensures all prerequisites are met before deploying MAAS on TrueNA
 
 ### Security Verification
 
-- [ ] **Containers Non-Root**: Running as uid/gid 1000
+- [ ] **Containers Non-Root**: Running as uid/gid 568
   ```bash
   docker exec maas-region id
   # Expected: uid=1000 gid=1000
@@ -401,7 +401,7 @@ docker compose logs
 ls -la /mnt/tank/maas/
 
 # Fix ownership
-sudo chown -R 1000:1000 /mnt/tank/maas/
+sudo chown -R 568:568 /mnt/tank/maas/
 ```
 
 **Database connection errors:**

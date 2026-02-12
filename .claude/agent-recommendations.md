@@ -465,7 +465,7 @@ async def test_maas_deployment_workflow():
 **Key Responsibilities**:
 - Audit Docker Compose security settings
 - Review secrets management (no hardcoded passwords)
-- Verify non-root execution (uid/gid 1000)
+- Verify non-root execution (uid/gid 568)
 - Check capability restrictions (NET_ADMIN, NET_RAW only)
 - Test network isolation (bridge vs host)
 - Review API authentication (MAAS, TrueNAS)
@@ -640,7 +640,7 @@ services:
 2. Target version is **TrueNAS 25.10+** (NOT 24.10)
 3. Use **JSON-RPC 2.0 WebSocket API** (NOT REST API)
 4. Docker Compose requires **`services:` key** (25.10+ requirement)
-5. Run containers as **non-root** (uid/gid 1000)
+5. Run containers as **non-root** (uid/gid 568)
 
 ### Critical API Requirement
 Any agent working with TrueNAS API:
@@ -653,7 +653,7 @@ Any agent working with compose.yaml:
 - **MUST INCLUDE**: `services:` top-level key
 - **MUST SUPPORT**: Variable substitution (`${VAR:-default}`)
 - **MUST CONFIGURE**: Health checks for services with dependencies
-- **MUST SET**: Non-root user (`user: "1000:1000"`)
+- **MUST SET**: Non-root user (`user: "568:568"`)
 
 ---
 

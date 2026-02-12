@@ -126,8 +126,8 @@ services:
     image: maasio/maas:3.5
     container_name: maas
 
-    # CRITICAL: Run as non-root (uid/gid 1000)
-    user: "1000:1000"
+    # CRITICAL: Run as non-root (uid/gid 568)
+    user: "568:568"
 
     # Restart policy
     restart: unless-stopped
@@ -174,7 +174,7 @@ services:
   postgres:
     image: postgres:14-alpine
     container_name: maas-postgres
-    user: "1000:1000"
+    user: "568:568"
     restart: unless-stopped
 
     environment:
@@ -300,7 +300,7 @@ questions:
 
 **compose.yaml:**
 - ✅ Contains `services:` key (25.10+ requirement)
-- ✅ All services use `user: "1000:1000"` (non-root)
+- ✅ All services use `user: "568:568"` (non-root)
 - ✅ Health checks defined for all services
 - ✅ Restart policies configured
 - ✅ Volume paths use host paths (not ixVolumes)

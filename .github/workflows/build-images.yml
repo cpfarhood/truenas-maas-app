@@ -236,7 +236,7 @@ jobs:
 
           All images are:
           - Built from official base images (Ubuntu 22.04, PostgreSQL 15)
-          - Run as non-root user (uid/gid 1000)
+          - Run as non-root user (uid/gid 568)
           - Scanned for vulnerabilities in CI/CD
           - Signed and verified by GitHub
 

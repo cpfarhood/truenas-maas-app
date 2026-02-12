@@ -1,22 +1,22 @@
 # TrueNAS MAAS Application - Custom PostgreSQL Dockerfile
 # Version: 1.0.0
 # Base: PostgreSQL 15 Alpine
-# Optimized for TrueNAS 25.10+ with uid/gid 1000 support
+# Optimized for TrueNAS 25.10+ with uid/gid 568 support
 #
 # This custom image solves the PostgreSQL non-root user conflict on TrueNAS:
 # - Official postgres image expects uid 999 or 70 (postgres user)
-# - TrueNAS 25.10+ requires uid/gid 1000 for app containers
-# - This image creates a postgres user with uid/gid 1000 and reconfigures PostgreSQL
+# - TrueNAS 25.10+ default uid/gid 568 (apps/apps)
+# - This image creates a postgres user with uid/gid 568 and reconfigures PostgreSQL
 
 FROM postgres:15-alpine
 
 LABEL maintainer="TrueNAS MAAS Application"
 LABEL version="1.0.0"
-LABEL description="PostgreSQL 15 for TrueNAS 25.10+ with uid/gid 1000 support"
+LABEL description="PostgreSQL 15 for TrueNAS 25.10+ with uid/gid 568 support"
 
 # Build arguments
-ARG POSTGRES_UID=1000
-ARG POSTGRES_GID=1000
+ARG POSTGRES_UID=568
+ARG POSTGRES_GID=568
 
 # Install required utilities
 RUN apk add --no-cache \

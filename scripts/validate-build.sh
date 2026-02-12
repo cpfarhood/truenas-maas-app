@@ -155,7 +155,7 @@ test_compose_yaml() {
     checks=$((checks + 1))
 
     # Check for non-root user
-    if grep -q 'user: "1000:1000"' compose.yaml; then
+    if grep -q 'user: "568:568"' compose.yaml; then
         log_info "  ✓ Non-root user configured"
         passed=$((passed + 1))
     else

@@ -90,8 +90,8 @@ if [[ "$CREATE_DIRS" =~ ^[Yy]$ ]]; then
     done
 
     echo ""
-    echo "Setting ownership to uid/gid 1000..."
-    chown -R 1000:1000 "$BASE_PATH"
+    echo "Setting ownership to uid/gid 568..."
+    chown -R 568:568 "$BASE_PATH"
     chmod -R 755 "$BASE_PATH"
     echo -e "${GREEN}✓${NC} Ownership and permissions set"
 else

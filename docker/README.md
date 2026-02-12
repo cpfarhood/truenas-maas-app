@@ -5,7 +5,7 @@ This directory contains the custom Docker image configuration for MAAS (Metal as
 ## Overview
 
 The custom Docker image provides:
-- **Non-root operation**: Runs as user/group 1000:1000 (TrueNAS 25.10+ requirement)
+- **Non-root operation**: Runs as user/group 568:568 (TrueNAS 25.10+ requirement)
 - **Ubuntu 22.04 base**: Official MAAS recommended base image
 - **MAAS 3.5**: Latest stable version from official PPA
 - **Health checks**: Comprehensive health monitoring for container orchestration
@@ -17,7 +17,7 @@ The custom Docker image provides:
 ### Base Configuration
 - **Base Image**: Ubuntu 22.04 LTS
 - **MAAS Version**: 3.5 (from official PPA)
-- **User/Group**: maas (UID 1000, GID 1000)
+- **User/Group**: maas (UID 568, GID 568)
 - **Default Shell**: bash
 
 ### Installed Components
@@ -267,7 +267,7 @@ docker compose logs maas
 ### Permission Denied Errors
 ```bash
 # Fix volume permissions
-sudo chown -R 1000:1000 /mnt/tank/maas/
+sudo chown -R 568:568 /mnt/tank/maas/
 sudo chmod -R 755 /mnt/tank/maas/
 ```
 
@@ -308,7 +308,7 @@ docker image prune -a
 ## Security Considerations
 
 ### Non-Root Operation
-The image runs as non-root user (UID 1000) by default. This is a TrueNAS 25.10+ requirement for enhanced security.
+The image runs as non-root user (UID 568) by default. This is a TrueNAS 25.10+ requirement for enhanced security.
 
 ### Capabilities
 Required Linux capabilities:

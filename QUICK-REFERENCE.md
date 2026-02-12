@@ -115,7 +115,7 @@ curl -f http://localhost:5240/MAAS/api/2.0/version/
 docker exec maas-region id
 
 # Fix volume permissions
-sudo chown -R 1000:1000 /mnt/tank/maas/
+sudo chown -R 568:568 /mnt/tank/maas/
 sudo chmod -R 755 /mnt/tank/maas/
 
 # Check port availability
@@ -224,7 +224,7 @@ cat .env
 ls -la /mnt/tank/maas/
 
 # Fix permissions
-sudo chown -R 1000:1000 /mnt/tank/maas/
+sudo chown -R 568:568 /mnt/tank/maas/
 ```
 
 ### Database connection error
@@ -257,7 +257,7 @@ netstat -uln | grep 69
 ls -la /mnt/tank/maas/
 
 # Fix ownership
-sudo chown -R 1000:1000 /mnt/tank/maas/
+sudo chown -R 568:568 /mnt/tank/maas/
 sudo chmod -R 755 /mnt/tank/maas/
 ```
 

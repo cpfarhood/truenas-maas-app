@@ -167,7 +167,7 @@ docker compose up -d postgres
 ```bash
 # Fix permissions
 sudo mkdir -p /mnt/tank/backups/maas
-sudo chown -R 1000:1000 /mnt/tank/backups/maas
+sudo chown -R 568:568 /mnt/tank/backups/maas
 ```
 
 **Problem**: "Backup file is corrupted"
@@ -200,7 +200,7 @@ docker compose logs maas
 # Common causes:
 # - Database schema mismatch: ensure backup is from same MAAS version
 # - Configuration issues: verify environment variables
-# - Permission issues: check volume ownership (uid/gid 1000)
+# - Permission issues: check volume ownership (uid/gid 568)
 
 # Rollback to safety backup
 ./scripts/restore-postgres.sh /tmp/maasdb-pre-restore-*.sql.gz

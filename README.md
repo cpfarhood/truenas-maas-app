@@ -97,8 +97,8 @@ MAAS requires access to several network ports:
    # Create all required directories
    sudo mkdir -p /mnt/tank/maas/{config,data,images,logs,tmp,postgres}
 
-   # Set ownership to uid/gid 1000 (required for non-root containers)
-   sudo chown -R 1000:1000 /mnt/tank/maas/
+   # Set ownership to uid/gid 568 (required for non-root containers)
+   sudo chown -R 568:568 /mnt/tank/maas/
 
    # Set permissions
    sudo chmod -R 755 /mnt/tank/maas/
@@ -455,7 +455,7 @@ docker compose logs postgres
 ls -la /mnt/tank/maas/
 
 # Fix permissions
-sudo chown -R 1000:1000 /mnt/tank/maas/
+sudo chown -R 568:568 /mnt/tank/maas/
 sudo chmod -R 755 /mnt/tank/maas/
 
 # Check for port conflicts
@@ -522,7 +522,7 @@ ls -la /mnt/tank/maas/
 # Should show: drwxr-xr-x ... 1000 1000 ...
 
 # Fix ownership
-sudo chown -R 1000:1000 /mnt/tank/maas/
+sudo chown -R 568:568 /mnt/tank/maas/
 sudo chmod -R 755 /mnt/tank/maas/
 ```
 
@@ -636,7 +636,7 @@ echo "Restoring volumes..."
 tar -xzf "${BACKUP_PATH}_volumes.tar.gz" -C /
 
 # Fix permissions
-chown -R 1000:1000 /mnt/tank/maas/
+chown -R 568:568 /mnt/tank/maas/
 
 # Start all services
 docker compose up -d

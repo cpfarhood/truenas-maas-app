@@ -1,5 +1,5 @@
 #!/bin/bash
-# PostgreSQL Entrypoint Wrapper for TrueNAS uid/gid 1000
+# PostgreSQL Entrypoint Wrapper for TrueNAS uid/gid 568
 # This script ensures proper permissions before starting PostgreSQL
 
 set -e
@@ -20,12 +20,12 @@ fix_permissions() {
         current_owner=$(stat -c '%u:%g' "$target_dir" 2>/dev/null || stat -f '%u:%g' "$target_dir" 2>/dev/null || echo "unknown")
         log "Current ownership of $target_dir: $current_owner"
 
-        # If we're running as uid 1000 (which we should be), ensure the directory is owned by us
+        # If we're running as uid 568 (which we should be), ensure the directory is owned by us
         if [ "$(id -u)" = "1000" ]; then
             # Only fix ownership if the directory is empty or already owned by 1000
             # This prevents data corruption if there's existing data with different ownership
-            if [ -z "$(ls -A "$target_dir")" ] || [ "$current_owner" = "1000:1000" ] || [ "$current_owner" = "999:999" ]; then
-                chown -R 1000:1000 "$target_dir" 2>/dev/null || {
+            if [ -z "$(ls -A "$target_dir")" ] || [ "$current_owner" = "568:568" ] || [ "$current_owner" = "999:999" ]; then
+                chown -R 568:568 "$target_dir" 2>/dev/null || {
                     log "Warning: Could not change ownership of $target_dir (may already be correct)"
                 }
                 chmod 700 "$target_dir" 2>/dev/null || {
@@ -33,13 +33,13 @@ fix_permissions() {
                 }
             else
                 log "Warning: $target_dir has unexpected ownership ($current_owner). Skipping ownership change to prevent data corruption."
-                log "If this is a new installation, please ensure the volume is owned by uid/gid 1000:1000"
+                log "If this is a new installation, please ensure the volume is owned by uid/gid 568:1000"
             fi
         fi
     fi
 }
 
-log "Starting PostgreSQL entrypoint wrapper for TrueNAS uid/gid 1000"
+log "Starting PostgreSQL entrypoint wrapper for TrueNAS uid/gid 568"
 log "Running as user: $(id -u):$(id -g)"
 log "PGDATA: ${PGDATA:-/var/lib/postgresql/data/pgdata}"
 
@@ -58,7 +58,7 @@ fix_permissions "/var/run/postgresql"
 if [ ! -d "$PGDATA" ]; then
     log "Creating PGDATA directory: $PGDATA"
     mkdir -p "$PGDATA"
-    chown -R 1000:1000 "$PGDATA" 2>/dev/null || true
+    chown -R 568:568 "$PGDATA" 2>/dev/null || true
     chmod 700 "$PGDATA"
 fi
 

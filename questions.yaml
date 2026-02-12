@@ -134,7 +134,7 @@ questions:
     label: "Configuration Storage Path"
     description: |
       Host path for MAAS configuration files. Approximately 100MB required.
-      Directory must exist and be owned by uid:gid 1000:1000.
+      Directory must exist and be owned by uid:gid 568:568.
     group: "Storage Configuration"
     schema:
       type: hostpath
@@ -145,7 +145,7 @@ questions:
     label: "Data Storage Path"
     description: |
       Host path for MAAS application data. Minimum 10GB required.
-      Directory must exist and be owned by uid:gid 1000:1000.
+      Directory must exist and be owned by uid:gid 568:568.
     group: "Storage Configuration"
     schema:
       type: hostpath
@@ -157,7 +157,7 @@ questions:
     description: |
       Host path for OS boot images. Minimum 100GB required (more recommended).
       This stores Ubuntu, CentOS, RHEL, and other OS images for deployment.
-      Directory must exist and be owned by uid:gid 1000:1000.
+      Directory must exist and be owned by uid:gid 568:568.
     group: "Storage Configuration"
     schema:
       type: hostpath
@@ -168,7 +168,7 @@ questions:
     label: "Logs Storage Path"
     description: |
       Host path for MAAS log files. Approximately 5GB recommended.
-      Directory must exist and be owned by uid:gid 1000:1000.
+      Directory must exist and be owned by uid:gid 568:568.
     group: "Storage Configuration"
     schema:
       type: hostpath
@@ -179,7 +179,7 @@ questions:
     label: "Temporary Files Path"
     description: |
       Host path for temporary files. Approximately 1GB recommended.
-      Directory must exist and be owned by uid:gid 1000:1000.
+      Directory must exist and be owned by uid:gid 568:568.
     group: "Storage Configuration"
     schema:
       type: hostpath
@@ -190,7 +190,7 @@ questions:
     label: "PostgreSQL Data Path"
     description: |
       Host path for PostgreSQL database files. Minimum 20GB required.
-      Directory must exist and be owned by uid:gid 1000:1000.
+      Directory must exist and be owned by uid:gid 568:568.
     group: "Storage Configuration"
     schema:
       type: hostpath
@@ -445,12 +445,12 @@ questions:
 #
 # Pre-Installation Steps:
 #   1. Create all storage directories on your TrueNAS system
-#   2. Set ownership to uid:gid 1000:1000 for all directories
+#   2. Set ownership to uid:gid 568:568 for all directories
 #   3. Ensure directories have 755 permissions
 #
 # Example commands to prepare storage:
 #   mkdir -p /mnt/tank/maas/{config,data,images,logs,tmp,postgres}
-#   chown -R 1000:1000 /mnt/tank/maas/
+#   chown -R 568:568 /mnt/tank/maas/
 #   chmod -R 755 /mnt/tank/maas/
 #
 # Network Mode Selection:
@@ -513,7 +513,7 @@ questions:
 #     * Verify MAAS has NET_ADMIN and NET_RAW capabilities
 #
 #   - Permission denied errors:
-#     * Verify all storage directories are owned by uid:gid 1000:1000
+#     * Verify all storage directories are owned by uid:gid 568:568
 #     * Check directory permissions are at least 755
 #     * Use: ls -la /mnt/tank/maas/ to verify
 #

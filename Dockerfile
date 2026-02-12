@@ -13,8 +13,8 @@ LABEL maas.version="3.5"
 
 # Build arguments
 ARG MAAS_VERSION=3.5
-ARG MAAS_UID=1000
-ARG MAAS_GID=1000
+ARG MAAS_UID=568
+ARG MAAS_GID=568
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Environment variables
