@@ -74,14 +74,16 @@ RUN add-apt-repository -y ppa:maas/${MAAS_VERSION} && \
     bind9 \
     && rm -rf /var/lib/apt/lists/*
 
-# Modify MAAS user and group to use UID/GID 1000 (TrueNAS requirement)
+# Modify MAAS user and group to use UID/GID 568 (TrueNAS requirement)
 # MAAS package creates user/group during installation, so we modify them
 RUN groupmod -g ${MAAS_GID} ${MAAS_GROUP} && \
     usermod -u ${MAAS_UID} -g ${MAAS_GID} -d /var/lib/maas -s /bin/bash ${MAAS_USER} && \
     # Add to sudo group for specific operations
     usermod -aG sudo ${MAAS_USER} && \
-    # Configure passwordless sudo for specific MAAS commands
-    echo "${MAAS_USER} ALL=(ALL) NOPASSWD: /usr/sbin/maas-region, /usr/bin/maas" > /etc/sudoers.d/maas
+    # Configure passwordless sudo with environment preservation for MAAS commands
+    echo "Defaults:maas !requiretty" > /etc/sudoers.d/maas && \
+    echo "maas ALL=(ALL) NOPASSWD: SETENV: /usr/sbin/maas-region, /usr/bin/maas" >> /etc/sudoers.d/maas && \
+    chmod 0440 /etc/sudoers.d/maas
 
 # Create necessary directories with proper ownership
 RUN mkdir -p \
