@@ -160,10 +160,12 @@ RUN sed -i "s/user www-data;/user ${MAAS_USER};/" /etc/nginx/nginx.conf && \
     mkdir -p /var/log/nginx && \
     chown -R ${MAAS_UID}:${MAAS_GID} /var/log/nginx
 
-# Configure bind9 to run as non-root
+# Configure bind9 to run as non-root (maas user)
 RUN mkdir -p /var/cache/bind /var/lib/bind /var/log/bind && \
     chown -R ${MAAS_UID}:${MAAS_GID} /var/cache/bind /var/lib/bind /var/log/bind /etc/bind && \
-    chmod -R 755 /var/cache/bind /var/lib/bind /var/log/bind
+    chmod -R 755 /var/cache/bind /var/lib/bind /var/log/bind && \
+    # Configure bind9 to run as maas user instead of bind user
+    sed -i 's/^OPTIONS=.*/OPTIONS="-u maas -4"/' /etc/default/named
 
 # Configure squid proxy to run as non-root
 RUN mkdir -p /var/log/squid /var/spool/squid && \
