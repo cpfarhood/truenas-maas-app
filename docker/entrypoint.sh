@@ -180,6 +180,21 @@ import_boot_images() {
 
 # Main initialization function
 main() {
+    # Check if initialization has already been completed
+    # This marker file prevents re-initialization on container restarts
+    local init_marker="/var/lib/maas/.initialized"
+
+    if [ -f "$init_marker" ]; then
+        log_info "============================================"
+        log_info "MAAS Already Initialized - Starting systemd"
+        log_info "============================================"
+        log_info "Initialization marker found at: $init_marker"
+        log_info "Skipping initialization, handing control to systemd..."
+
+        # Exec systemd directly - this replaces the current process
+        exec /sbin/init --log-target=console 3>&1
+    fi
+
     log_info "============================================"
     log_info "MAAS Region Controller Initialization"
     log_info "Version: 1.0.0"
@@ -242,6 +257,12 @@ main() {
     # Enable MAAS services to start with systemd
     log_info "Enabling MAAS services..."
     systemctl enable maas-regiond.service || log_warning "Could not enable maas-regiond service"
+
+    # Create initialization marker to prevent re-initialization on container restart
+    local init_marker="/var/lib/maas/.initialized"
+    log_info "Creating initialization marker at: $init_marker"
+    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$init_marker"
+    chown ${MAAS_UID:-568}:${MAAS_GID:-568} "$init_marker"
 
     # Exec systemd as PID 1 to manage all services
     # This replaces the current process with systemd

@@ -156,6 +156,9 @@ services:
       # Temporary files for MAAS (not /tmp - that's tmpfs)
       - ${MAAS_TMP_PATH:-/mnt/tank/maas/tmp}:/tmp/maas:rw
 
+      # Systemd cgroup access (required for systemd in container)
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+
     # Linux capabilities required for MAAS operations
     # NET_ADMIN: Network configuration (DHCP, DNS)
     # NET_RAW: Raw socket access for DHCP server
