@@ -41,6 +41,10 @@ services:
     volumes:
       - ${POSTGRES_DATA_PATH:-/mnt/tank/maas/postgres}:/var/lib/postgresql/data:rw
 
+    # Expose PostgreSQL port to host (required for MAAS in host network mode)
+    ports:
+      - "5432:5432"
+
     # Health check for database readiness
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-maas} -d ${POSTGRES_DB:-maasdb}"]
@@ -116,7 +120,7 @@ services:
       - MAAS_ADMIN_EMAIL=${MAAS_ADMIN_EMAIL:?MAAS_ADMIN_EMAIL is required}
 
       # Database Connection
-      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_HOST=${POSTGRES_HOST:-localhost}
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
       - POSTGRES_DB=${POSTGRES_DB:-maasdb}
       - POSTGRES_USER=${POSTGRES_USER:-maas}
