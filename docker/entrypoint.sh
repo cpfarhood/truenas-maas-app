@@ -130,15 +130,20 @@ create_admin_user() {
     log_info "Creating MAAS admin user '${MAAS_ADMIN_USERNAME:-admin}'..."
 
     # Create admin user using Django shell
-    # Use Python's raw string to avoid any shell interpretation of the password
-    if sudo maas-region shell <<-PYTHON 2>&1 | grep -q "Admin user created successfully"
+    # Export password to ensure it's available in sudo environment
+    export MAAS_ADMIN_PASSWORD
+
+    if sudo -E maas-region shell <<-'PYTHON' 2>&1 | grep -q "Admin user created successfully"
 	from django.contrib.auth import get_user_model
 	import os
 	User = get_user_model()
+	username = os.environ.get('MAAS_ADMIN_USERNAME', 'admin')
+	email = os.environ['MAAS_ADMIN_EMAIL']
+	password = os.environ['MAAS_ADMIN_PASSWORD']
 	user = User.objects.create_superuser(
-	    username='${MAAS_ADMIN_USERNAME:-admin}',
-	    email='${MAAS_ADMIN_EMAIL}',
-	    password=os.environ['MAAS_ADMIN_PASSWORD']
+	    username=username,
+	    email=email,
+	    password=password
 	)
 	print('Admin user created successfully')
 	PYTHON

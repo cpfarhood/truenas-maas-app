@@ -184,14 +184,14 @@ cat > "$ENV_FILE" <<EOF
 
 MAAS_URL="${MAAS_URL}"
 MAAS_ADMIN_USERNAME="${ADMIN_USERNAME}"
-MAAS_ADMIN_PASSWORD="${ADMIN_PASSWORD}"
+MAAS_ADMIN_PASSWORD="$(echo -n "${ADMIN_PASSWORD}")"
 MAAS_ADMIN_EMAIL="${ADMIN_EMAIL}"
 
 # =============================================================================
 # Database Configuration
 # =============================================================================
 
-POSTGRES_PASSWORD="${DB_PASSWORD}"
+POSTGRES_PASSWORD="$(echo -n "${DB_PASSWORD}")"
 POSTGRES_DB="maasdb"
 POSTGRES_USER="maas"
 
