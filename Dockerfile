@@ -107,13 +107,17 @@ RUN groupmod -g ${MAAS_GID} ${MAAS_GROUP} && \
     chmod 0440 /etc/sudoers.d/maas
 
 # Create necessary directories with proper ownership
+# Based on MAAS runtime requirements and Airship MAAS containerization patterns
 RUN mkdir -p \
     /etc/maas \
     /var/lib/maas \
     /var/lib/maas/boot-resources \
     /var/lib/maas/gnupg-home \
     /var/lib/maas/image-storage \
+    /var/lib/maas/image-storage/bootloaders \
     /var/lib/maas/temporal-storage \
+    /var/lib/maas/certificates \
+    /var/lib/maas/http \
     /var/log/maas \
     /var/spool/maas-proxy \
     /run/lock/maas \
@@ -168,9 +172,32 @@ RUN mkdir -p /var/log/squid /var/spool/squid && \
 # Copy entrypoint and healthcheck scripts
 COPY --chown=${MAAS_UID}:${MAAS_GID} docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY --chown=${MAAS_UID}:${MAAS_GID} docker/healthcheck.sh /usr/local/bin/healthcheck.sh
+COPY --chown=${MAAS_UID}:${MAAS_GID} docker/setup-nginx-config.sh /usr/local/bin/setup-nginx-config.sh
 
 # Make scripts executable
-RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/healthcheck.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/healthcheck.sh /usr/local/bin/setup-nginx-config.sh
+
+# Create systemd service for nginx config generation
+# This runs before maas-http to ensure nginx.conf wrapper exists
+RUN cat > /etc/systemd/system/maas-nginx-setup.service << 'SYSTEMD_EOF'
+[Unit]
+Description=MAAS Nginx Configuration Setup
+After=maas-regiond.service
+Before=maas-http.service
+ConditionPathExists=/var/lib/maas/http/regiond.nginx.conf
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/setup-nginx-config.sh
+RemainAfterExit=yes
+User=maas
+
+[Install]
+WantedBy=multi-user.target
+SYSTEMD_EOF
+
+# Enable the nginx setup service
+RUN systemctl enable maas-nginx-setup.service
 
 # Expose MAAS ports
 # 5240: HTTP UI/API

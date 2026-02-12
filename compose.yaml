@@ -184,12 +184,13 @@ services:
       - seccomp=unconfined
 
     # Health check for MAAS service readiness
+    # Uses the main UI endpoint which is more reliable than API during startup
     healthcheck:
-      test: ["CMD", "curl", "-f", "-k", "http://localhost:5240/MAAS/api/2.0/version/"]
+      test: ["CMD", "curl", "-f", "-I", "http://localhost:5240/MAAS/"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 90s
+      start_period: 120s
 
     # Service dependencies
     # MAAS requires PostgreSQL to be healthy before starting
