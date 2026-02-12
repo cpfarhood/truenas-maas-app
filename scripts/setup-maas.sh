@@ -143,6 +143,8 @@ ADMIN_EMAIL=$(prompt_input "Enter admin email" "admin@example.com")
 echo ""
 echo "Admin password (leave empty to generate):"
 ADMIN_PASSWORD=$(prompt_input "Enter admin password" "" "secret")
+# Strip any trailing whitespace/newlines
+ADMIN_PASSWORD=$(echo -n "$ADMIN_PASSWORD")
 
 if [ -z "$ADMIN_PASSWORD" ]; then
     ADMIN_PASSWORD=$(generate_password)
@@ -154,6 +156,8 @@ fi
 echo ""
 echo "PostgreSQL password (leave empty to generate):"
 DB_PASSWORD=$(prompt_input "Enter database password" "" "secret")
+# Strip any trailing whitespace/newlines
+DB_PASSWORD=$(echo -n "$DB_PASSWORD")
 
 if [ -z "$DB_PASSWORD" ]; then
     DB_PASSWORD=$(generate_password)
@@ -184,14 +188,14 @@ cat > "$ENV_FILE" <<EOF
 
 MAAS_URL="${MAAS_URL}"
 MAAS_ADMIN_USERNAME="${ADMIN_USERNAME}"
-MAAS_ADMIN_PASSWORD="$(echo -n "${ADMIN_PASSWORD}")"
+MAAS_ADMIN_PASSWORD="${ADMIN_PASSWORD}"
 MAAS_ADMIN_EMAIL="${ADMIN_EMAIL}"
 
 # =============================================================================
 # Database Configuration
 # =============================================================================
 
-POSTGRES_PASSWORD="$(echo -n "${DB_PASSWORD}")"
+POSTGRES_PASSWORD="${DB_PASSWORD}"
 POSTGRES_DB="maasdb"
 POSTGRES_USER="maas"
 
