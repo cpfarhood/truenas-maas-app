@@ -60,7 +60,15 @@ services:
   # MAAS Region Controller Service
   # Provides web UI, API, and manages physical infrastructure
   maas:
-    image: ${IMAGE_REPOSITORY:-maasio/maas}:${IMAGE_TAG:-3.5}
+    # Build from custom Dockerfile optimized for TrueNAS
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MAAS_VERSION: ${MAAS_VERSION:-3.5}
+        MAAS_UID: 1000
+        MAAS_GID: 1000
+    image: ${IMAGE_REPOSITORY:-truenas-maas}:${IMAGE_TAG:-3.5}
     container_name: maas-region
     restart: unless-stopped
 

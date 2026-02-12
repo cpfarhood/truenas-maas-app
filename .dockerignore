@@ -1,0 +1,67 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!docker/README.md
+docs/
+prompts/
+
+# Development files
+.env
+.env.*
+*.log
+*.tmp
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+tests/
+*.test
+*.spec
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Application configuration (should be mounted)
+app.yaml
+compose.yaml
+questions.yaml
+
+# Scripts (not needed in image)
+scripts/
+
+# Build artifacts
+*.tar.gz
+*.zip
+
+# Templates (mounted at runtime)
+templates/
+
+# Large files
+*.iso
+*.img
+
+# Backup files
+*.bak
+*.backup
+
+# Claude and MCP
+.claude/
+.mcp.json
+CLAUDE.md
+
+# Other
+*.pyc
+__pycache__/
+node_modules/
