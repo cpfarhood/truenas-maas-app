@@ -1,0 +1,150 @@
+# TrueNAS App Metadata for MAAS (Metal as a Service)
+# Target: TrueNAS 25.10+ (Goldeye)
+# Version: 1.0.0
+
+# Required metadata fields
+name: maas
+title: MAAS - Metal as a Service
+version: 1.0.0
+app_version: 3.5.0
+train: community
+lib_version: 2.1.77
+lib_version_hash: 58a0ba3ba5c77bdacf3501c587e7484f0d3c0eeb2b2b7b4d8c5d8f5e8d5e8d5e
+
+# Minimum TrueNAS version (CRITICAL for 25.10+ features)
+min_scale_version: 25.10.0
+
+# Descriptive information
+description: |
+  MAAS (Metal as a Service) provides automated bare metal server provisioning,
+  lifecycle management, and infrastructure orchestration. Deploy operating systems,
+  configure storage, manage networking, and control physical infrastructure through
+  a modern web UI and RESTful API.
+
+  Key Features:
+  - Automated server discovery via PXE boot
+  - Rapid OS deployment (Ubuntu, CentOS, RHEL, Windows) in under 2 minutes
+  - Power management (IPMI, Redfish, BMC)
+  - Automated RAID, LVM, ZFS, and bcache configuration
+  - DHCP, DNS, VLAN, and subnet management
+  - Full RESTful API with OAuth authentication
+  - Native integration with Kubernetes, OpenStack, Terraform, and Ansible
+
+  Use Cases:
+  - Private cloud infrastructure provisioning
+  - High-performance computing (HPC) cluster deployment
+  - Edge computing with remote bare metal management
+  - CI/CD infrastructure automation
+  - Kubernetes node provisioning
+
+home: https://maas.io
+changelog_url: https://discourse.maas.io/c/release-notes
+
+# Categorization for TrueNAS app catalog
+categories:
+  - infrastructure
+  - automation
+  - devops
+
+keywords:
+  - maas
+  - bare-metal
+  - provisioning
+  - pxe
+  - cloud
+  - infrastructure
+  - automation
+  - ipmi
+  - bmc
+  - kubernetes
+  - openstack
+  - datacenter
+
+# Maintainer information
+maintainers:
+  - name: TrueNAS MAAS Integration Team
+    email: maas-truenas@example.com
+    url: https://github.com/cpfarhood/truenas-maas-app
+
+# Source repositories
+sources:
+  - https://github.com/canonical/maas
+  - https://github.com/cpfarhood/truenas-maas-app
+
+# Visual assets (placeholders - update with actual URLs)
+icon: https://assets.ubuntu.com/v1/0de4fcd5-maas-logo.svg
+screenshots:
+  - https://assets.ubuntu.com/v1/maas-machines-list.png
+  - https://assets.ubuntu.com/v1/maas-dashboard.png
+
+# Security context - run as non-root for security
+run_as_context:
+  - description: MAAS runs as a dedicated user for security isolation
+    uid: 1000
+    gid: 1000
+    user_name: maas
+    group_name: maas
+
+# Linux capabilities required for MAAS operation
+capabilities:
+  - NET_ADMIN     # Network configuration (DHCP, VLAN management)
+  - NET_RAW       # Raw socket access for DHCP server
+  - SYS_ADMIN     # System administration for PXE boot
+
+# Host mounts (none required for standard deployment)
+host_mounts: []
+
+# Notes for users
+notes: |
+  ## Post-Installation Steps
+
+  1. Access the MAAS web UI at the configured port (default: 5240)
+  2. Log in with the admin credentials you configured
+  3. Import boot images for desired operating systems:
+     - Navigate to Images section
+     - Select OS versions to import
+     - Wait for download to complete
+  4. Configure networking:
+     - Define subnets
+     - Enable DHCP on appropriate VLANs
+     - Configure DNS settings
+  5. Add physical machines:
+     - Via IPMI/BMC credentials
+     - Manual PXE boot enrollment
+     - Automatic discovery
+
+  ## Important Notes
+
+  - **Network Mode**: Use host networking for PXE boot functionality
+  - **Storage**: Allocate at least 100GB for boot images
+  - **Database**: PostgreSQL included, passwords are auto-generated
+  - **API**: Access API at http://<host>:5240/MAAS/api/2.0/
+
+  ## Documentation
+
+  - Official MAAS Docs: https://maas.io/docs
+  - API Reference: https://canonical.com/maas/docs/api
+  - Community: https://discourse.maas.io
+
+  ## Security Recommendations
+
+  - Change default admin password immediately
+  - Restrict network access to MAAS UI
+  - Use strong PostgreSQL passwords
+  - Enable HTTPS via reverse proxy for production
+
+# Version compatibility information
+supported_platforms:
+  - linux/amd64
+  - linux/arm64
+
+# Resource requirements (recommendations)
+requirements:
+  minimum:
+    cpu: 2
+    memory: 4Gi
+    storage: 120Gi
+  recommended:
+    cpu: 4
+    memory: 8Gi
+    storage: 250Gi

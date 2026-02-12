@@ -1,0 +1,532 @@
+# TrueNAS MAAS Application Configuration Form
+# Version: 1.0.0
+# Target: TrueNAS 25.10+
+#
+# This file defines the user interface for configuring the MAAS application
+# through the TrueNAS web interface. All settings are organized into logical
+# groups with validation rules and helpful descriptions.
+
+groups:
+  - name: "MAAS Configuration"
+    description: "Core MAAS settings including URL and administrator credentials"
+
+  - name: "Database Configuration"
+    description: "PostgreSQL database settings for persistent data storage"
+
+  - name: "Storage Configuration"
+    description: "Volume paths for MAAS data, configuration, images, and logs"
+
+  - name: "Network Configuration"
+    description: "Network mode and port mappings for MAAS services"
+
+  - name: "Advanced Configuration"
+    description: "Optional advanced settings for DNS, images, and debugging"
+
+  - name: "Container Configuration"
+    description: "Docker image and timezone settings"
+
+questions:
+  # =============================================================================
+  # MAAS Configuration
+  # =============================================================================
+
+  - variable: maas_url
+    label: "MAAS URL"
+    description: |
+      Full URL where MAAS will be accessible. This must be reachable by managed machines.
+      Examples: http://192.168.1.100:5240/MAAS or http://truenas.local:5240/MAAS
+      IMPORTANT: Include /MAAS at the end of the URL.
+    group: "MAAS Configuration"
+    schema:
+      type: string
+      required: true
+      default: "http://192.168.1.100:5240/MAAS"
+      pattern: "^https?://[a-zA-Z0-9.-]+(:[0-9]+)?/MAAS$"
+      pattern_error: "URL must start with http:// or https:// and end with /MAAS"
+
+  - variable: maas_admin_username
+    label: "MAAS Admin Username"
+    description: "Username for the MAAS administrator account. Used to login to the web UI."
+    group: "MAAS Configuration"
+    schema:
+      type: string
+      required: true
+      default: "admin"
+      min_length: 3
+      max_length: 32
+      pattern: "^[a-z][a-z0-9_-]*$"
+      pattern_error: "Username must start with a lowercase letter and contain only lowercase letters, numbers, hyphens, and underscores"
+
+  - variable: maas_admin_password
+    label: "MAAS Admin Password"
+    description: |
+      Password for the MAAS administrator account. Minimum 8 characters recommended.
+      Use a strong password with mixed case, numbers, and symbols.
+    group: "MAAS Configuration"
+    schema:
+      type: string
+      required: true
+      private: true
+      min_length: 8
+      max_length: 128
+      default: ""
+
+  - variable: maas_admin_email
+    label: "MAAS Admin Email"
+    description: "Email address for the MAAS administrator account. Used for notifications."
+    group: "MAAS Configuration"
+    schema:
+      type: string
+      required: true
+      default: "admin@example.com"
+      pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+      pattern_error: "Must be a valid email address"
+
+  # =============================================================================
+  # Database Configuration
+  # =============================================================================
+
+  - variable: postgres_password
+    label: "PostgreSQL Database Password"
+    description: |
+      Password for the PostgreSQL database. Minimum 12 characters recommended.
+      This is a critical security setting - use a strong, unique password.
+    group: "Database Configuration"
+    schema:
+      type: string
+      required: true
+      private: true
+      min_length: 12
+      max_length: 128
+      default: ""
+
+  - variable: postgres_db
+    label: "PostgreSQL Database Name"
+    description: "Name of the PostgreSQL database for MAAS data storage."
+    group: "Database Configuration"
+    schema:
+      type: string
+      required: true
+      default: "maasdb"
+      min_length: 3
+      max_length: 63
+      pattern: "^[a-z][a-z0-9_]*$"
+      pattern_error: "Database name must start with a letter and contain only lowercase letters, numbers, and underscores"
+
+  - variable: postgres_user
+    label: "PostgreSQL Database User"
+    description: "Username for the PostgreSQL database connection."
+    group: "Database Configuration"
+    schema:
+      type: string
+      required: true
+      default: "maas"
+      min_length: 3
+      max_length: 63
+      pattern: "^[a-z][a-z0-9_]*$"
+      pattern_error: "Username must start with a letter and contain only lowercase letters, numbers, and underscores"
+
+  # =============================================================================
+  # Storage Configuration
+  # =============================================================================
+
+  - variable: maas_config_path
+    label: "Configuration Storage Path"
+    description: |
+      Host path for MAAS configuration files. Approximately 100MB required.
+      Directory must exist and be owned by uid:gid 1000:1000.
+    group: "Storage Configuration"
+    schema:
+      type: hostpath
+      required: true
+      default: "/mnt/tank/maas/config"
+
+  - variable: maas_data_path
+    label: "Data Storage Path"
+    description: |
+      Host path for MAAS application data. Minimum 10GB required.
+      Directory must exist and be owned by uid:gid 1000:1000.
+    group: "Storage Configuration"
+    schema:
+      type: hostpath
+      required: true
+      default: "/mnt/tank/maas/data"
+
+  - variable: maas_images_path
+    label: "Boot Images Storage Path"
+    description: |
+      Host path for OS boot images. Minimum 100GB required (more recommended).
+      This stores Ubuntu, CentOS, RHEL, and other OS images for deployment.
+      Directory must exist and be owned by uid:gid 1000:1000.
+    group: "Storage Configuration"
+    schema:
+      type: hostpath
+      required: true
+      default: "/mnt/tank/maas/images"
+
+  - variable: maas_logs_path
+    label: "Logs Storage Path"
+    description: |
+      Host path for MAAS log files. Approximately 5GB recommended.
+      Directory must exist and be owned by uid:gid 1000:1000.
+    group: "Storage Configuration"
+    schema:
+      type: hostpath
+      required: true
+      default: "/mnt/tank/maas/logs"
+
+  - variable: maas_tmp_path
+    label: "Temporary Files Path"
+    description: |
+      Host path for temporary files. Approximately 1GB recommended.
+      Directory must exist and be owned by uid:gid 1000:1000.
+    group: "Storage Configuration"
+    schema:
+      type: hostpath
+      required: true
+      default: "/mnt/tank/maas/tmp"
+
+  - variable: postgres_data_path
+    label: "PostgreSQL Data Path"
+    description: |
+      Host path for PostgreSQL database files. Minimum 20GB required.
+      Directory must exist and be owned by uid:gid 1000:1000.
+    group: "Storage Configuration"
+    schema:
+      type: hostpath
+      required: true
+      default: "/mnt/tank/maas/postgres"
+
+  # =============================================================================
+  # Network Configuration
+  # =============================================================================
+
+  - variable: network_mode
+    label: "Network Mode"
+    description: |
+      Container network mode. Host mode is REQUIRED for PXE boot and DHCP functionality.
+      Use bridge mode only for testing or API-only access without bare metal provisioning.
+    group: "Network Configuration"
+    schema:
+      type: string
+      required: true
+      default: "host"
+      enum:
+        - value: "host"
+          description: "Host network (required for PXE boot/DHCP) - RECOMMENDED"
+        - value: "bridge"
+          description: "Bridge network (isolated, no PXE boot capability) - Testing only"
+
+  - variable: maas_http_port
+    label: "HTTP Port"
+    description: |
+      Port for MAAS web interface and API access. Only used in bridge mode.
+      In host mode, MAAS uses port 5240 directly on the host.
+    group: "Network Configuration"
+    schema:
+      type: int
+      required: true
+      default: 5240
+      min: 1024
+      max: 65535
+      show_if: [["network_mode", "=", "bridge"]]
+
+  - variable: maas_https_port
+    label: "HTTPS Port"
+    description: |
+      Port for MAAS HTTPS access. Only used in bridge mode.
+      In host mode, MAAS uses port 5443 directly on the host.
+    group: "Network Configuration"
+    schema:
+      type: int
+      required: true
+      default: 5443
+      min: 1024
+      max: 65535
+      show_if: [["network_mode", "=", "bridge"]]
+
+  - variable: tftp_port
+    label: "TFTP Port"
+    description: |
+      Port for TFTP service (PXE boot). Only used in bridge mode.
+      In host mode, MAAS uses port 69/UDP directly on the host.
+      WARNING: Port 69 requires root privileges or CAP_NET_BIND_SERVICE.
+    group: "Network Configuration"
+    schema:
+      type: int
+      required: true
+      default: 69
+      min: 1
+      max: 65535
+      show_if: [["network_mode", "=", "bridge"]]
+
+  - variable: proxy_port
+    label: "HTTP Proxy Port"
+    description: |
+      Port for MAAS HTTP proxy service (image downloads). Only used in bridge mode.
+      In host mode, MAAS uses port 8000 directly on the host.
+    group: "Network Configuration"
+    schema:
+      type: int
+      required: true
+      default: 8000
+      min: 1024
+      max: 65535
+      show_if: [["network_mode", "=", "bridge"]]
+
+  # =============================================================================
+  # Advanced Configuration
+  # =============================================================================
+
+  - variable: maas_dns_forwarder
+    label: "DNS Forwarder"
+    description: |
+      Primary DNS server for MAAS to forward DNS queries to.
+      Default is Google DNS (8.8.8.8). Change to your local DNS server if needed.
+    group: "Advanced Configuration"
+    schema:
+      type: string
+      required: false
+      default: "8.8.8.8"
+      pattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+      pattern_error: "Must be a valid IPv4 address"
+
+  - variable: maas_upstream_dns
+    label: "Upstream DNS Servers"
+    description: |
+      Space-separated list of upstream DNS servers for MAAS.
+      Default is Google DNS (8.8.8.8 8.8.4.4). Change to your DNS servers if needed.
+    group: "Advanced Configuration"
+    schema:
+      type: string
+      required: false
+      default: "8.8.8.8 8.8.4.4"
+
+  - variable: maas_boot_images_auto_import
+    label: "Auto-Import Boot Images"
+    description: |
+      Automatically import Ubuntu boot images on first startup.
+      This downloads OS images needed for deployment (may take significant time).
+      Disable if you want to manually select which images to import.
+    group: "Advanced Configuration"
+    schema:
+      type: boolean
+      required: false
+      default: true
+
+  - variable: maas_debug
+    label: "Enable Debug Mode"
+    description: |
+      Enable debug logging for troubleshooting. Increases log verbosity.
+      WARNING: Debug mode generates significantly more log data.
+    group: "Advanced Configuration"
+    schema:
+      type: boolean
+      required: false
+      default: false
+
+  - variable: maas_region_secret
+    label: "MAAS Region Secret"
+    description: |
+      Optional shared secret for MAAS region controller communication.
+      Leave empty to auto-generate. Only needed for multi-region deployments.
+    group: "Advanced Configuration"
+    schema:
+      type: string
+      required: false
+      private: true
+      default: ""
+      min_length: 0
+      max_length: 256
+
+  # =============================================================================
+  # Container Configuration
+  # =============================================================================
+
+  - variable: image_repository
+    label: "Docker Image Repository"
+    description: "Docker Hub repository for MAAS container images. Default is official MAAS image."
+    group: "Container Configuration"
+    schema:
+      type: string
+      required: true
+      default: "maasio/maas"
+      pattern: "^[a-z0-9][a-z0-9-./]*[a-z0-9]$"
+      pattern_error: "Must be a valid Docker repository name"
+
+  - variable: image_tag
+    label: "Docker Image Tag"
+    description: |
+      MAAS version tag. Default is 3.5 (latest stable).
+      Available tags: 3.5, 3.4, 3.3, latest (use specific versions for production).
+    group: "Container Configuration"
+    schema:
+      type: string
+      required: true
+      default: "3.5"
+      pattern: "^[a-zA-Z0-9][a-zA-Z0-9.-]*$"
+      pattern_error: "Must be a valid Docker tag"
+
+  - variable: timezone
+    label: "Timezone"
+    description: |
+      Container timezone (TZ environment variable). Uses IANA timezone database format.
+      Examples: America/New_York, Europe/London, Asia/Tokyo, Etc/UTC
+    group: "Container Configuration"
+    schema:
+      type: string
+      required: true
+      default: "Etc/UTC"
+      enum:
+        - value: "Etc/UTC"
+          description: "UTC (Coordinated Universal Time)"
+        - value: "America/New_York"
+          description: "Eastern Time (US & Canada)"
+        - value: "America/Chicago"
+          description: "Central Time (US & Canada)"
+        - value: "America/Denver"
+          description: "Mountain Time (US & Canada)"
+        - value: "America/Los_Angeles"
+          description: "Pacific Time (US & Canada)"
+        - value: "America/Phoenix"
+          description: "Arizona (no DST)"
+        - value: "America/Anchorage"
+          description: "Alaska Time"
+        - value: "Pacific/Honolulu"
+          description: "Hawaii Time"
+        - value: "Europe/London"
+          description: "London (GMT/BST)"
+        - value: "Europe/Paris"
+          description: "Central European Time"
+        - value: "Europe/Berlin"
+          description: "Berlin (CET/CEST)"
+        - value: "Europe/Rome"
+          description: "Rome (CET/CEST)"
+        - value: "Europe/Madrid"
+          description: "Madrid (CET/CEST)"
+        - value: "Europe/Amsterdam"
+          description: "Amsterdam (CET/CEST)"
+        - value: "Asia/Tokyo"
+          description: "Japan Standard Time"
+        - value: "Asia/Shanghai"
+          description: "China Standard Time"
+        - value: "Asia/Hong_Kong"
+          description: "Hong Kong Time"
+        - value: "Asia/Singapore"
+          description: "Singapore Time"
+        - value: "Asia/Dubai"
+          description: "Gulf Standard Time"
+        - value: "Asia/Kolkata"
+          description: "India Standard Time"
+        - value: "Australia/Sydney"
+          description: "Australian Eastern Time"
+        - value: "Australia/Melbourne"
+          description: "Australian Eastern Time"
+        - value: "Australia/Brisbane"
+          description: "Australian Eastern Standard Time"
+        - value: "Australia/Perth"
+          description: "Australian Western Time"
+        - value: "Pacific/Auckland"
+          description: "New Zealand Time"
+
+# =============================================================================
+# Configuration Notes
+# =============================================================================
+#
+# Storage Requirements Summary:
+#   - Configuration:  ~100MB
+#   - Data:           ~10GB minimum
+#   - Boot Images:    100GB+ (depends on OS images imported)
+#   - Logs:           5GB recommended
+#   - Temp:           1GB recommended
+#   - PostgreSQL:     20GB minimum
+#   ------------------------------------------
+#   - TOTAL:          ~135GB minimum
+#
+# Pre-Installation Steps:
+#   1. Create all storage directories on your TrueNAS system
+#   2. Set ownership to uid:gid 1000:1000 for all directories
+#   3. Ensure directories have 755 permissions
+#
+# Example commands to prepare storage:
+#   mkdir -p /mnt/tank/maas/{config,data,images,logs,tmp,postgres}
+#   chown -R 1000:1000 /mnt/tank/maas/
+#   chmod -R 755 /mnt/tank/maas/
+#
+# Network Mode Selection:
+#   - Host Mode (RECOMMENDED):
+#     * Required for PXE boot and DHCP server functionality
+#     * Allows MAAS to provision bare metal machines
+#     * Uses host network stack directly
+#     * Port mappings are ignored (MAAS uses standard ports)
+#
+#   - Bridge Mode (Testing Only):
+#     * Isolated network environment
+#     * Cannot perform PXE boot or DHCP operations
+#     * Suitable for API testing or web UI evaluation
+#     * Port mappings apply (configure as needed)
+#
+# Security Best Practices:
+#   1. Use strong, unique passwords (16+ characters recommended)
+#   2. Generate passwords with: openssl rand -base64 24
+#   3. Change default passwords immediately after installation
+#   4. Restrict network access to MAAS UI via firewall
+#   5. Consider using a reverse proxy with TLS for HTTPS
+#   6. Regularly update MAAS and PostgreSQL containers
+#   7. Monitor logs for unauthorized access attempts
+#   8. Backup PostgreSQL database regularly
+#
+# Post-Installation Steps:
+#   1. Access MAAS web UI at configured URL (default: http://<host>:5240/MAAS)
+#   2. Login with admin credentials configured above
+#   3. Navigate to Images section and import desired OS images:
+#      * Ubuntu 22.04 LTS (recommended)
+#      * Ubuntu 20.04 LTS
+#      * CentOS Stream 9
+#      * Other supported distributions
+#   4. Configure networking:
+#      * Define subnets matching your infrastructure
+#      * Enable DHCP on appropriate VLANs
+#      * Configure DNS forwarders
+#   5. Add physical machines:
+#      * Via IPMI/BMC credentials (power management)
+#      * Manual PXE boot enrollment
+#      * Automatic discovery (machines boot from network)
+#   6. Commission and test machines before deployment
+#
+# Troubleshooting:
+#   - Services won't start:
+#     * Check TrueNAS logs for the MAAS app
+#     * Verify storage directories exist with correct ownership
+#     * Ensure all required fields are filled correctly
+#     * Check for port conflicts with other applications
+#
+#   - Database connection errors:
+#     * Verify PostgreSQL password matches configuration
+#     * Check PostgreSQL container logs
+#     * Ensure PostgreSQL container is healthy
+#
+#   - PXE boot not working:
+#     * Verify network_mode is set to "host"
+#     * Check that TFTP port 69/UDP is accessible
+#     * Ensure firewall allows TFTP and DHCP traffic
+#     * Verify MAAS has NET_ADMIN and NET_RAW capabilities
+#
+#   - Permission denied errors:
+#     * Verify all storage directories are owned by uid:gid 1000:1000
+#     * Check directory permissions are at least 755
+#     * Use: ls -la /mnt/tank/maas/ to verify
+#
+#   - Out of space errors:
+#     * Check available space: df -h /mnt/tank/
+#     * Allocate more space for images (100GB+ recommended)
+#     * Clean up old boot images via MAAS web UI
+#
+# Resources:
+#   - MAAS Documentation: https://maas.io/docs
+#   - MAAS API Reference: https://canonical.com/maas/docs/api
+#   - Community Support: https://discourse.maas.io
+#   - GitHub Repository: https://github.com/cpfarhood/truenas-maas-app
+#   - TrueNAS Apps Guide: https://www.truenas.com/docs/truenasapps/
+#
+# =============================================================================

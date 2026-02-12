@@ -1,0 +1,288 @@
+#!/bin/bash
+# setup-maas.sh
+# Initial setup script for MAAS on TrueNAS
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo ""
+echo "=========================================="
+echo "MAAS on TrueNAS - Initial Setup"
+echo "=========================================="
+echo ""
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then
+    echo -e "${YELLOW}Note: This script may require sudo for directory creation${NC}"
+    echo ""
+fi
+
+# Function to prompt for input
+prompt_input() {
+    local prompt="$1"
+    local default="$2"
+    local secret="$3"
+    local result
+
+    if [ "$secret" = "secret" ]; then
+        read -sp "$prompt [$default]: " result
+        echo ""
+    else
+        read -p "$prompt [$default]: " result
+    fi
+
+    echo "${result:-$default}"
+}
+
+# Function to generate secure password
+generate_password() {
+    openssl rand -base64 24 | tr -d '=+/' | cut -c1-24
+}
+
+echo -e "${BLUE}Step 1: Storage Configuration${NC}"
+echo "----------------------------------------"
+echo ""
+
+DEFAULT_BASE_PATH="/mnt/tank/maas"
+BASE_PATH=$(prompt_input "Enter base storage path" "$DEFAULT_BASE_PATH")
+
+echo ""
+echo "Storage directories will be created at:"
+echo "  - ${BASE_PATH}/config"
+echo "  - ${BASE_PATH}/data"
+echo "  - ${BASE_PATH}/images"
+echo "  - ${BASE_PATH}/logs"
+echo "  - ${BASE_PATH}/tmp"
+echo "  - ${BASE_PATH}/postgres"
+echo ""
+
+read -p "Create these directories? [Y/n]: " CREATE_DIRS
+CREATE_DIRS=${CREATE_DIRS:-Y}
+
+if [[ "$CREATE_DIRS" =~ ^[Yy]$ ]]; then
+    echo "Creating directories..."
+
+    DIRS=(
+        "${BASE_PATH}/config"
+        "${BASE_PATH}/data"
+        "${BASE_PATH}/images"
+        "${BASE_PATH}/logs"
+        "${BASE_PATH}/tmp"
+        "${BASE_PATH}/postgres"
+    )
+
+    for dir in "${DIRS[@]}"; do
+        if [ -d "$dir" ]; then
+            echo -e "${YELLOW}  ⚠${NC} $dir already exists"
+        else
+            mkdir -p "$dir"
+            echo -e "${GREEN}  ✓${NC} Created $dir"
+        fi
+    done
+
+    echo ""
+    echo "Setting ownership to uid/gid 1000..."
+    chown -R 1000:1000 "$BASE_PATH"
+    chmod -R 755 "$BASE_PATH"
+    echo -e "${GREEN}✓${NC} Ownership and permissions set"
+else
+    echo "Skipping directory creation"
+fi
+
+echo ""
+echo -e "${BLUE}Step 2: Environment Configuration${NC}"
+echo "----------------------------------------"
+echo ""
+
+# Check if .env already exists
+ENV_FILE="${PROJECT_ROOT}/.env"
+if [ -f "$ENV_FILE" ]; then
+    echo -e "${YELLOW}⚠ .env file already exists${NC}"
+    read -p "Overwrite existing .env file? [y/N]: " OVERWRITE
+    OVERWRITE=${OVERWRITE:-N}
+
+    if [[ ! "$OVERWRITE" =~ ^[Yy]$ ]]; then
+        echo "Keeping existing .env file"
+        echo ""
+        echo -e "${GREEN}Setup complete!${NC}"
+        echo ""
+        echo "Next steps:"
+        echo "  1. Review your .env file: ${ENV_FILE}"
+        echo "  2. Validate configuration: ./scripts/validate-compose.sh"
+        echo "  3. Start services: docker compose up -d"
+        exit 0
+    fi
+fi
+
+# Get network configuration
+echo "Detecting network configuration..."
+DEFAULT_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "192.168.1.100")
+echo ""
+
+MAAS_IP=$(prompt_input "Enter MAAS server IP address" "$DEFAULT_IP")
+MAAS_PORT=$(prompt_input "Enter MAAS HTTP port" "5240")
+MAAS_URL="http://${MAAS_IP}:${MAAS_PORT}/MAAS"
+
+echo ""
+echo "MAAS will be accessible at: ${MAAS_URL}"
+echo ""
+
+# Get admin credentials
+ADMIN_USERNAME=$(prompt_input "Enter admin username" "admin")
+ADMIN_EMAIL=$(prompt_input "Enter admin email" "admin@example.com")
+
+echo ""
+echo "Admin password (leave empty to generate):"
+ADMIN_PASSWORD=$(prompt_input "Enter admin password" "" "secret")
+
+if [ -z "$ADMIN_PASSWORD" ]; then
+    ADMIN_PASSWORD=$(generate_password)
+    echo -e "${GREEN}Generated password: ${ADMIN_PASSWORD}${NC}"
+    echo -e "${YELLOW}⚠ Save this password - it will only be shown once${NC}"
+fi
+
+# Get database password
+echo ""
+echo "PostgreSQL password (leave empty to generate):"
+DB_PASSWORD=$(prompt_input "Enter database password" "" "secret")
+
+if [ -z "$DB_PASSWORD" ]; then
+    DB_PASSWORD=$(generate_password)
+    echo -e "${GREEN}Generated password: ${DB_PASSWORD}${NC}"
+fi
+
+# Get network mode
+echo ""
+echo "Network mode:"
+echo "  1) host   - Required for PXE boot (recommended)"
+echo "  2) bridge - Isolated network (testing only)"
+read -p "Select network mode [1]: " NETWORK_CHOICE
+NETWORK_CHOICE=${NETWORK_CHOICE:-1}
+
+if [ "$NETWORK_CHOICE" = "1" ]; then
+    NETWORK_MODE="host"
+else
+    NETWORK_MODE="bridge"
+fi
+
+# Get timezone
+echo ""
+TIMEZONE=$(prompt_input "Enter timezone" "Etc/UTC")
+
+# Create .env file
+echo ""
+echo "Creating .env file..."
+
+cat > "$ENV_FILE" <<EOF
+# MAAS Docker Compose Environment Variables
+# Generated by setup script on $(date)
+
+# =============================================================================
+# MAAS Configuration
+# =============================================================================
+
+MAAS_URL=${MAAS_URL}
+MAAS_ADMIN_USERNAME=${ADMIN_USERNAME}
+MAAS_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+MAAS_ADMIN_EMAIL=${ADMIN_EMAIL}
+
+# =============================================================================
+# Database Configuration
+# =============================================================================
+
+POSTGRES_PASSWORD=${DB_PASSWORD}
+POSTGRES_DB=maasdb
+POSTGRES_USER=maas
+
+# =============================================================================
+# Network Configuration
+# =============================================================================
+
+NETWORK_MODE=${NETWORK_MODE}
+MAAS_HTTP_PORT=${MAAS_PORT}
+
+# =============================================================================
+# Storage Paths
+# =============================================================================
+
+MAAS_CONFIG_PATH=${BASE_PATH}/config
+MAAS_DATA_PATH=${BASE_PATH}/data
+MAAS_IMAGES_PATH=${BASE_PATH}/images
+MAAS_LOGS_PATH=${BASE_PATH}/logs
+MAAS_TMP_PATH=${BASE_PATH}/tmp
+POSTGRES_DATA_PATH=${BASE_PATH}/postgres
+
+# =============================================================================
+# System Configuration
+# =============================================================================
+
+TZ=${TIMEZONE}
+
+# =============================================================================
+# Optional Configuration
+# =============================================================================
+
+# IMAGE_REPOSITORY=maasio/maas
+# IMAGE_TAG=3.5
+# MAAS_DNS_FORWARDER=8.8.8.8
+# MAAS_UPSTREAM_DNS=8.8.8.8 8.8.4.4
+# MAAS_BOOT_IMAGES_AUTO_IMPORT=true
+EOF
+
+chmod 600 "$ENV_FILE"
+
+echo -e "${GREEN}✓${NC} .env file created: ${ENV_FILE}"
+echo -e "${GREEN}✓${NC} File permissions set to 600 (owner read/write only)"
+
+echo ""
+echo "=========================================="
+echo -e "${GREEN}Setup Complete!${NC}"
+echo "=========================================="
+echo ""
+
+echo "Configuration Summary:"
+echo "  • MAAS URL: ${MAAS_URL}"
+echo "  • Admin Username: ${ADMIN_USERNAME}"
+echo "  • Network Mode: ${NETWORK_MODE}"
+echo "  • Storage Path: ${BASE_PATH}"
+echo ""
+
+echo "Next Steps:"
+echo ""
+echo "  1. Review configuration:"
+echo "     cat ${ENV_FILE}"
+echo ""
+echo "  2. Validate setup:"
+echo "     ${SCRIPT_DIR}/validate-compose.sh"
+echo ""
+echo "  3. Start MAAS:"
+echo "     cd ${PROJECT_ROOT}"
+echo "     docker compose up -d"
+echo ""
+echo "  4. Monitor startup:"
+echo "     docker compose logs -f"
+echo ""
+echo "  5. Access MAAS UI:"
+echo "     ${MAAS_URL}"
+echo "     Username: ${ADMIN_USERNAME}"
+echo "     Password: <see .env file>"
+echo ""
+echo "  6. Post-installation:"
+echo "     - Import boot images (Settings → Images)"
+echo "     - Configure subnets and DHCP"
+echo "     - Enroll physical machines"
+echo ""
+echo -e "${YELLOW}Important:${NC}"
+echo "  • Save your passwords securely"
+echo "  • Do not commit .env file to version control"
+echo "  • Review DOCKER-COMPOSE-README.md for detailed documentation"
+echo ""
