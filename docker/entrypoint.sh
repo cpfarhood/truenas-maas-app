@@ -161,20 +161,21 @@ configure_maas() {
 start_maas_services() {
     log_info "Starting MAAS region controller services..."
 
-    # MAAS 3.x services need to be started via systemd or run directly
-    # In a container without systemd, we'll start them in the background
+    # MAAS 3.x uses systemd services, but in Docker we need to start them manually
+    # The services are: maas-regiond, maas-rackd (optional), maas-proxy, maas-dhcpd, maas-bind9
 
-    # Start MAASregion D API server (background)
+    # Start the MAAS region controller using twistd (the underlying service)
     log_info "Starting MAAS regiond service..."
-    sudo -E -u maas PYTHONPATH=/usr/lib/python3/dist-packages maas-regiond serve --worker-threads 4 > /var/log/maas/regiond.log 2>&1 &
+    sudo -E -u maas twistd3 --nodaemon --pidfile= maas-regiond > /var/log/maas/regiond.log 2>&1 &
     REGIOND_PID=$!
 
     # Give it a moment to start
-    sleep 3
+    sleep 5
 
     # Check if process is still running
     if ! kill -0 $REGIOND_PID 2>/dev/null; then
         log_error "Failed to start MAAS region controller"
+        cat /var/log/maas/regiond.log 2>/dev/null || log_error "No log file generated"
         return 1
     fi
 
@@ -277,7 +278,7 @@ main() {
 }
 
 # Handle signals for graceful shutdown
-trap 'log_info "Received shutdown signal, stopping MAAS..."; killall maas-regiond 2>/dev/null; exit 0' SIGTERM SIGINT
+trap 'log_info "Received shutdown signal, stopping MAAS..."; killall twistd3 2>/dev/null; exit 0' SIGTERM SIGINT
 
 # Run main function
 main "$@"
