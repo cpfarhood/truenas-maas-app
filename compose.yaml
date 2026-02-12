@@ -90,9 +90,11 @@ services:
     user: "1000:1000"
 
     # Network configuration
-    # Use host mode for PXE boot/DHCP functionality
-    # Use bridge mode for web UI only access
-    network_mode: ${NETWORK_MODE:-host}
+    # IMPORTANT: For PXE boot functionality, MAAS requires host network mode
+    # Default is host mode. For testing without PXE, you can use bridge mode.
+    # To use bridge mode: Set NETWORK_MODE=bridge in .env and uncomment the
+    # 'networks' section below (and comment out network_mode)
+    network_mode: host  # Change to 'bridge' if not using PXE boot
 
     # Port mappings (only used in bridge mode)
     # In host mode, these are ignored and MAAS uses default ports directly
@@ -197,8 +199,11 @@ services:
     stop_grace_period: 120s
 
     # Networks
-    networks:
-      - maas-internal
+    # NOTE: Networks are only used when network_mode is NOT set to 'host'
+    # When using host network mode, this section is ignored
+    # Uncomment the line below if using bridge mode (set NETWORK_MODE=bridge in .env)
+    # networks:
+    #   - maas-internal
 
 # Network definitions
 networks:
