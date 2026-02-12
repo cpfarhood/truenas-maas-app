@@ -233,6 +233,19 @@ EOF
     mkdir -p /run/chrony
     chown ${MAAS_UID:-568}:${MAAS_GID:-568} /run/chrony
 
+    # Create required MAAS directories that may be masked by volume mounts
+    # These must exist for MAAS to start properly
+    log_info "Ensuring required MAAS directories exist..."
+    mkdir -p /var/lib/maas/certificates \
+             /var/lib/maas/http \
+             /var/lib/maas/image-storage/bootloaders \
+             /var/lib/maas/prometheus
+    chown -R ${MAAS_UID:-568}:${MAAS_GID:-568} \
+             /var/lib/maas/certificates \
+             /var/lib/maas/http \
+             /var/lib/maas/image-storage \
+             /var/lib/maas/prometheus
+
     # Check if initialization has already been completed
     # This marker file prevents re-initialization on container restarts
     local init_marker="/var/lib/maas/.initialized"
