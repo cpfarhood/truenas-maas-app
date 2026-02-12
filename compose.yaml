@@ -174,8 +174,9 @@ services:
       - AUDIT_WRITE
 
     # Security options
-    security_opt:
-      - no-new-privileges:true
+    # Note: no-new-privileges disabled for MAAS because maas-region command requires sudo
+    # security_opt:
+    #   - no-new-privileges:true
 
     # Health check for MAAS service readiness
     healthcheck:
