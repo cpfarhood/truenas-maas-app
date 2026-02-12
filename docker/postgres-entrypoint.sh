@@ -21,8 +21,8 @@ fix_permissions() {
         log "Current ownership of $target_dir: $current_owner"
 
         # If we're running as uid 568 (which we should be), ensure the directory is owned by us
-        if [ "$(id -u)" = "1000" ]; then
-            # Only fix ownership if the directory is empty or already owned by 1000
+        if [ "$(id -u)" = "568" ]; then
+            # Only fix ownership if the directory is empty or already owned by 568
             # This prevents data corruption if there's existing data with different ownership
             if [ -z "$(ls -A "$target_dir")" ] || [ "$current_owner" = "568:568" ] || [ "$current_owner" = "999:999" ]; then
                 chown -R 568:568 "$target_dir" 2>/dev/null || {
@@ -33,7 +33,7 @@ fix_permissions() {
                 }
             else
                 log "Warning: $target_dir has unexpected ownership ($current_owner). Skipping ownership change to prevent data corruption."
-                log "If this is a new installation, please ensure the volume is owned by uid/gid 568:1000"
+                log "If this is a new installation, please ensure the volume is owned by uid/gid 568:568"
             fi
         fi
     fi
