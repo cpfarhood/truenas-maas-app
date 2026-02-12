@@ -160,23 +160,26 @@ services:
     # NET_ADMIN: Network configuration (DHCP, DNS)
     # NET_RAW: Raw socket access for DHCP server
     # NET_BIND_SERVICE: Bind to privileged ports (< 1024)
+    # SYS_ADMIN: Required for systemd in container
     cap_add:
       - NET_ADMIN
       - NET_RAW
       - NET_BIND_SERVICE
-
-    # Drop unnecessary capabilities
-    # Note: AUDIT_* capabilities required for sudo to work properly
-    cap_drop:
       - SYS_ADMIN
-      - SYS_MODULE
-      - SYS_RAWIO
-      - SYS_TIME
+
+    # Systemd requires access to cgroups
+    # Mount cgroup filesystem for systemd to manage services
+    volumes_from: []
+    tmpfs:
+      - /run
+      - /run/lock
+      - /tmp
 
     # Security options
-    # Note: no-new-privileges disabled for MAAS because maas-region command requires sudo
-    # security_opt:
-    #   - no-new-privileges:true
+    # Note: no-new-privileges disabled for systemd compatibility
+    # Systemd needs to manage privileges for services
+    security_opt:
+      - seccomp=unconfined
 
     # Health check for MAAS service readiness
     healthcheck:

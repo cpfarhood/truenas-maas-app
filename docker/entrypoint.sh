@@ -158,30 +158,10 @@ configure_maas() {
 }
 
 # Function to start MAAS services
+# NOTE: With systemd, we don't need to manually start services
+# Systemd will automatically start enabled services based on their unit files
 start_maas_services() {
-    log_info "Starting MAAS region controller services..."
-
-    # MAAS region controller runs via Python directly, not through systemd
-    # We start it as a background process as the maas user
-
-    log_info "Starting MAAS regiond service..."
-    # Run as maas user directly (we're already maas user in the container)
-    /usr/lib/maas/maasserver/region.py > /var/log/maas/regiond.log 2>&1 &
-    REGIOND_PID=$!
-
-    # Give it time to start
-    sleep 5
-
-    # Check if process is still running
-    if ! kill -0 $REGIOND_PID 2>/dev/null; then
-        log_error "Failed to start MAAS region controller"
-        log_error "Last 20 lines of log:"
-        tail -20 /var/log/maas/regiond.log 2>/dev/null || log_error "No log file generated"
-        return 1
-    fi
-
-    log_success "MAAS regiond started (PID: $REGIOND_PID)"
-
+    log_info "MAAS services will be started by systemd"
     return 0
 }
 
@@ -249,37 +229,26 @@ main() {
         log_info "Skipping initialization steps..."
     fi
 
-    # Start MAAS services
-    if ! start_maas_services; then
-        log_error "Failed to start MAAS services"
-        exit 1
-    fi
-
     # Import boot images info
     import_boot_images
 
     log_success "============================================"
-    log_success "MAAS Region Controller Ready"
+    log_success "MAAS Initialization Complete"
     log_success "Web UI: ${MAAS_URL}"
     log_success "Username: ${MAAS_ADMIN_USERNAME:-admin}"
+    log_success "Starting systemd to manage MAAS services..."
     log_success "============================================"
 
-    # Keep container running and tail logs
-    log_info "Monitoring MAAS logs (Ctrl+C to view container logs)..."
-    tail -f /var/log/maas/regiond.log /var/log/maas/maas.log 2>/dev/null || {
-        log_info "Log files not available yet, waiting for MAAS to create them..."
-        # Keep container running
-        while true; do
-            sleep 60
-            if [ -f /var/log/maas/regiond.log ]; then
-                tail -f /var/log/maas/regiond.log /var/log/maas/maas.log 2>/dev/null || sleep 60
-            fi
-        done
-    }
+    # Enable MAAS services to start with systemd
+    log_info "Enabling MAAS services..."
+    systemctl enable maas-regiond.service || log_warning "Could not enable maas-regiond service"
+
+    # Exec systemd as PID 1 to manage all services
+    # This replaces the current process with systemd
+    log_info "Handing control to systemd..."
+    exec /sbin/init --log-target=console 3>&1
 }
 
-# Handle signals for graceful shutdown
-trap 'log_info "Received shutdown signal, stopping MAAS..."; killall python3 2>/dev/null; exit 0' SIGTERM SIGINT
-
 # Run main function
+# Note: No signal traps needed - systemd will handle all signal management
 main "$@"

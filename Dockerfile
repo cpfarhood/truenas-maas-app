@@ -52,7 +52,28 @@ RUN apt-get update && \
     # System utilities
     sudo \
     tzdata \
+    # Systemd for service management in container
+    systemd \
+    systemd-sysv \
+    dbus \
     && rm -rf /var/lib/apt/lists/*
+
+# Configure systemd for container operation
+# Remove unnecessary systemd services and targets
+RUN cd /lib/systemd/system/sysinit.target.wants/ && \
+    ls | grep -v systemd-tmpfiles-setup | xargs rm -f $1 || true && \
+    rm -f /lib/systemd/system/multi-user.target.wants/* \
+    /etc/systemd/system/*.wants/* \
+    /lib/systemd/system/local-fs.target.wants/* \
+    /lib/systemd/system/sockets.target.wants/*udev* \
+    /lib/systemd/system/sockets.target.wants/*initctl* \
+    /lib/systemd/system/basic.target.wants/* \
+    /lib/systemd/system/anaconda.target.wants/* \
+    /lib/systemd/system/plymouth* \
+    /lib/systemd/system/systemd-update-utmp*
+
+# Configure systemd defaults for container
+RUN systemctl set-default multi-user.target
 
 # Add MAAS PPA and install MAAS
 RUN add-apt-repository -y ppa:maas/${MAAS_VERSION} && \
@@ -165,17 +186,18 @@ EXPOSE 5240 5443 69/udp 5241 5242 5243 5244 5245 5246 5247 5248 5250-5270 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
     CMD ["/usr/local/bin/healthcheck.sh"]
 
-# Switch to non-root user
-USER ${MAAS_UID}:${MAAS_GID}
-
 # Set working directory
 WORKDIR /var/lib/maas
 
 # Volume mount points
 VOLUME ["/etc/maas", "/var/lib/maas", "/var/log/maas", "/tmp/maas"]
 
-# Entrypoint
+# Stop signal for systemd
+STOPSIGNAL SIGRTMIN+3
+
+# Run initialization script as entrypoint (runs as root for systemd compatibility)
+# The entrypoint will perform initialization then exec systemd
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
-# Default command (overridable)
-CMD ["maas-region"]
+# Start systemd as init system (manages all MAAS services)
+CMD ["/sbin/init", "--log-target=console", "3>&1"]
