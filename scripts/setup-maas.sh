@@ -160,19 +160,11 @@ if [ -z "$DB_PASSWORD" ]; then
     echo -e "${GREEN}Generated password: ${DB_PASSWORD}${NC}"
 fi
 
-# Get network mode
+# Network mode is now hardcoded in compose.yaml
+# For PXE boot functionality, host mode is required and set by default
 echo ""
-echo "Network mode:"
-echo "  1) host   - Required for PXE boot (recommended)"
-echo "  2) bridge - Isolated network (testing only)"
-read -p "Select network mode [1]: " NETWORK_CHOICE
-NETWORK_CHOICE=${NETWORK_CHOICE:-1}
-
-if [ "$NETWORK_CHOICE" = "1" ]; then
-    NETWORK_MODE="host"
-else
-    NETWORK_MODE="bridge"
-fi
+echo -e "${YELLOW}Note: Network mode is hardcoded to 'host' in compose.yaml (required for PXE boot)${NC}"
+echo -e "${YELLOW}      If you need bridge mode, edit compose.yaml manually after setup${NC}"
 
 # Get timezone
 echo ""
@@ -206,8 +198,9 @@ POSTGRES_USER="maas"
 # =============================================================================
 # Network Configuration
 # =============================================================================
+# Note: NETWORK_MODE is hardcoded in compose.yaml to 'host' (required for PXE boot)
+# To use bridge mode, edit compose.yaml directly
 
-NETWORK_MODE="${NETWORK_MODE}"
 MAAS_HTTP_PORT="${MAAS_PORT}"
 
 # =============================================================================
