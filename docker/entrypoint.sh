@@ -211,6 +211,12 @@ import_boot_images() {
 
 # Main initialization function
 main() {
+    # Configure bind9 to run as maas user
+    # This must run on EVERY start, not just first initialization
+    # Package installation overwrites /etc/default/named on first start
+    log_info "Configuring bind9 to run as maas user..."
+    sed -i 's/-u bind/-u maas/' /etc/default/named
+
     # Check if initialization has already been completed
     # This marker file prevents re-initialization on container restarts
     local init_marker="/var/lib/maas/.initialized"
@@ -329,11 +335,6 @@ main() {
     log_info "Creating initialization marker at: $init_marker"
     echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$init_marker"
     chown ${MAAS_UID:-568}:${MAAS_GID:-568} "$init_marker"
-
-    # Configure bind9 to run as maas user
-    # Must be done here because package installation overwrites /etc/default/named
-    log_info "Configuring bind9 to run as maas user..."
-    sed -i 's/-u bind/-u maas/' /etc/default/named
 
     # Exec systemd as PID 1 to manage all services
     # This replaces the current process with systemd
