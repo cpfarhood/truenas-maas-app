@@ -161,18 +161,24 @@ configure_maas() {
 start_maas_services() {
     log_info "Starting MAAS region controller services..."
 
-    # Start MAAS region controller
-    log_info "Starting MAAS region API service..."
-    sudo maas-region start || {
+    # MAAS 3.x services need to be started via systemd or run directly
+    # In a container without systemd, we'll start them in the background
+
+    # Start MAASregion D API server (background)
+    log_info "Starting MAAS regiond service..."
+    sudo -E -u maas PYTHONPATH=/usr/lib/python3/dist-packages maas-regiond serve --worker-threads 4 > /var/log/maas/regiond.log 2>&1 &
+    REGIOND_PID=$!
+
+    # Give it a moment to start
+    sleep 3
+
+    # Check if process is still running
+    if ! kill -0 $REGIOND_PID 2>/dev/null; then
         log_error "Failed to start MAAS region controller"
         return 1
-    }
+    fi
 
-    log_success "MAAS services started successfully"
-
-    # Show service status
-    log_info "MAAS Region Controller Status:"
-    sudo maas-region status || true
+    log_success "MAAS regiond started (PID: $REGIOND_PID)"
 
     return 0
 }
@@ -271,7 +277,7 @@ main() {
 }
 
 # Handle signals for graceful shutdown
-trap 'log_info "Received shutdown signal, stopping MAAS..."; sudo maas-region stop; exit 0' SIGTERM SIGINT
+trap 'log_info "Received shutdown signal, stopping MAAS..."; killall maas-regiond 2>/dev/null; exit 0' SIGTERM SIGINT
 
 # Run main function
 main "$@"
