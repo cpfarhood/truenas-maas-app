@@ -118,6 +118,7 @@ RUN mkdir -p \
     /var/lib/maas/temporal-storage \
     /var/lib/maas/certificates \
     /var/lib/maas/http \
+    /var/lib/maas/prometheus \
     /var/log/maas \
     /var/spool/maas-proxy \
     /run/lock/maas \
