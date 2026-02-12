@@ -91,7 +91,8 @@ services:
     restart: unless-stopped
 
     # Run as non-root user (TrueNAS 25.10+ requirement)
-    user: "568:568"
+    # User is set in Dockerfile, don't override here to preserve passwd entry
+    # user: "568:568"
 
     # Network configuration
     # IMPORTANT: For PXE boot functionality, MAAS requires host network mode
