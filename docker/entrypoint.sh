@@ -217,17 +217,11 @@ main() {
     log_info "Configuring bind9 to run as maas user..."
     sed -i 's/-u bind/-u maas/' /etc/default/named
 
-    # Configure chrony systemd service for proper status reporting
-    # This fixes the "Dead" status in MAAS UI while chrony is actually running
-    log_info "Configuring chrony systemd service..."
-    mkdir -p /etc/systemd/system/chrony.service.d
-    cat > /etc/systemd/system/chrony.service.d/override.conf << 'EOF'
-[Service]
-Type=forking
-PIDFile=/run/chrony/chronyd.pid
-Restart=on-failure
-RestartSec=5
-EOF
+    # Configure chrony to run in daemon mode instead of foreground mode
+    # /etc/default/chrony sets DAEMON_OPTS="-F 1" which runs in foreground
+    # This conflicts with systemd Type=forking, so we remove the -F flag
+    log_info "Configuring chrony to run in daemon mode..."
+    sed -i 's/DAEMON_OPTS="-F 1"/DAEMON_OPTS=""/' /etc/default/chrony
 
     # Ensure chrony PID directory exists with correct permissions
     mkdir -p /run/chrony
