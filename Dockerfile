@@ -82,7 +82,7 @@ RUN groupmod -g ${MAAS_GID} ${MAAS_GROUP} && \
     usermod -aG sudo ${MAAS_USER} && \
     # Configure passwordless sudo with environment preservation for MAAS commands
     echo "Defaults:maas !requiretty" > /etc/sudoers.d/maas && \
-    echo "maas ALL=(ALL) NOPASSWD: SETENV: /usr/sbin/maas-region, /usr/bin/maas" >> /etc/sudoers.d/maas && \
+    echo "maas ALL=(ALL) NOPASSWD: SETENV: /usr/sbin/maas-region, /usr/bin/maas, /usr/bin/twistd3" >> /etc/sudoers.d/maas && \
     chmod 0440 /etc/sudoers.d/maas
 
 # Create necessary directories with proper ownership
