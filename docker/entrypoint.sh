@@ -129,20 +129,20 @@ create_admin_user() {
 
     log_info "Creating MAAS admin user '${MAAS_ADMIN_USERNAME:-admin}'..."
 
-    # Create admin user using Django shell for better password handling
-    # This approach avoids issues with special characters in passwords
-    local create_user_script="
-from django.contrib.auth import get_user_model
-User = get_user_model()
-user = User.objects.create_superuser(
-    username='${MAAS_ADMIN_USERNAME:-admin}',
-    email='${MAAS_ADMIN_EMAIL}',
-    password='${MAAS_ADMIN_PASSWORD}'
-)
-print('Admin user created successfully')
-"
-
-    if echo "$create_user_script" | sudo maas-region shell 2>&1 | grep -q "Admin user created successfully"; then
+    # Create admin user using Django shell
+    # Use Python's raw string to avoid any shell interpretation of the password
+    if sudo maas-region shell <<-PYTHON 2>&1 | grep -q "Admin user created successfully"
+	from django.contrib.auth import get_user_model
+	import os
+	User = get_user_model()
+	user = User.objects.create_superuser(
+	    username='${MAAS_ADMIN_USERNAME:-admin}',
+	    email='${MAAS_ADMIN_EMAIL}',
+	    password=os.environ['MAAS_ADMIN_PASSWORD']
+	)
+	print('Admin user created successfully')
+	PYTHON
+    then
         log_success "Admin user '${MAAS_ADMIN_USERNAME:-admin}' created successfully"
         log_info "Email: ${MAAS_ADMIN_EMAIL}"
     else
