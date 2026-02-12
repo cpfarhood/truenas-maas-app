@@ -153,8 +153,8 @@ services:
       # Log files
       - ${MAAS_LOGS_PATH:-/mnt/tank/maas/logs}:/var/log/maas:rw
 
-      # Temporary files
-      - ${MAAS_TMP_PATH:-/mnt/tank/maas/tmp}:/tmp:rw
+      # Temporary files for MAAS (not /tmp - that's tmpfs)
+      - ${MAAS_TMP_PATH:-/mnt/tank/maas/tmp}:/tmp/maas:rw
 
     # Linux capabilities required for MAAS operations
     # NET_ADMIN: Network configuration (DHCP, DNS)
@@ -167,9 +167,8 @@ services:
       - NET_BIND_SERVICE
       - SYS_ADMIN
 
-    # Systemd requires access to cgroups
-    # Mount cgroup filesystem for systemd to manage services
-    volumes_from: []
+    # Systemd requires tmpfs mounts for proper operation
+    # These are ephemeral filesystems that systemd uses for runtime data
     tmpfs:
       - /run
       - /run/lock
