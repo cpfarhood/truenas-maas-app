@@ -519,7 +519,7 @@ tftp> get version.txt
 ```bash
 # Check directory ownership
 ls -la /mnt/tank/maas/
-# Should show: drwxr-xr-x ... 1000 1000 ...
+# Should show: drwxr-xr-x ... 568 568 ...
 
 # Fix ownership
 sudo chown -R 568:568 /mnt/tank/maas/
