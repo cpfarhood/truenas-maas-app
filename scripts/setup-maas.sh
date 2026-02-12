@@ -190,42 +190,42 @@ cat > "$ENV_FILE" <<EOF
 # MAAS Configuration
 # =============================================================================
 
-MAAS_URL=${MAAS_URL}
-MAAS_ADMIN_USERNAME=${ADMIN_USERNAME}
-MAAS_ADMIN_PASSWORD=${ADMIN_PASSWORD}
-MAAS_ADMIN_EMAIL=${ADMIN_EMAIL}
+MAAS_URL="${MAAS_URL}"
+MAAS_ADMIN_USERNAME="${ADMIN_USERNAME}"
+MAAS_ADMIN_PASSWORD="${ADMIN_PASSWORD}"
+MAAS_ADMIN_EMAIL="${ADMIN_EMAIL}"
 
 # =============================================================================
 # Database Configuration
 # =============================================================================
 
-POSTGRES_PASSWORD=${DB_PASSWORD}
-POSTGRES_DB=maasdb
-POSTGRES_USER=maas
+POSTGRES_PASSWORD="${DB_PASSWORD}"
+POSTGRES_DB="maasdb"
+POSTGRES_USER="maas"
 
 # =============================================================================
 # Network Configuration
 # =============================================================================
 
-NETWORK_MODE=${NETWORK_MODE}
-MAAS_HTTP_PORT=${MAAS_PORT}
+NETWORK_MODE="${NETWORK_MODE}"
+MAAS_HTTP_PORT="${MAAS_PORT}"
 
 # =============================================================================
 # Storage Paths
 # =============================================================================
 
-MAAS_CONFIG_PATH=${BASE_PATH}/config
-MAAS_DATA_PATH=${BASE_PATH}/data
-MAAS_IMAGES_PATH=${BASE_PATH}/images
-MAAS_LOGS_PATH=${BASE_PATH}/logs
-MAAS_TMP_PATH=${BASE_PATH}/tmp
-POSTGRES_DATA_PATH=${BASE_PATH}/postgres
+MAAS_CONFIG_PATH="${BASE_PATH}/config"
+MAAS_DATA_PATH="${BASE_PATH}/data"
+MAAS_IMAGES_PATH="${BASE_PATH}/images"
+MAAS_LOGS_PATH="${BASE_PATH}/logs"
+MAAS_TMP_PATH="${BASE_PATH}/tmp"
+POSTGRES_DATA_PATH="${BASE_PATH}/postgres"
 
 # =============================================================================
 # System Configuration
 # =============================================================================
 
-TZ=${TIMEZONE}
+TZ="${TIMEZONE}"
 
 # =============================================================================
 # Optional Configuration
