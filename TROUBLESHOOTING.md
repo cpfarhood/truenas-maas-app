@@ -40,25 +40,21 @@
 2. Verify volume mount: `docker inspect maas-region | grep -A 10 Mounts`
 3. Test write access: `docker exec maas-region touch /etc/maas/test.txt`
 
-#### 2. Sudo Environment Preservation Error
+#### 2. Sudo Environment Preservation Error ✅ FIXED
 ```
 sudo: sorry, you are not allowed to preserve the environment
 ```
 
 **Cause:** MAAS initialization requires running `sudo maas-region` commands with environment variables preserved.
 
-**Current Sudoers Configuration:**
-```
-maas ALL=(ALL) NOPASSWD: /usr/sbin/maas-region, /usr/bin/maas
-```
-
-**Missing:** The `SETENV` tag that allows environment preservation.
-
-**Fix Needed in Dockerfile:**
+**Fix Applied:**
 ```bash
 echo "Defaults:maas !requiretty" > /etc/sudoers.d/maas && \
-echo "maas ALL=(ALL) NOPASSWD: SETENV: /usr/sbin/maas-region, /usr/bin/maas" >> /etc/sudoers.d/maas
+echo "maas ALL=(ALL) NOPASSWD: SETENV: /usr/sbin/maas-region, /usr/bin/maas" >> /etc/sudoers.d/maas && \
+chmod 0440 /etc/sudoers.d/maas
 ```
+
+**Status:** Fixed in Dockerfile, rebuild required to apply.
 
 ## Debugging Commands
 
@@ -152,13 +148,14 @@ MAAS_ADMIN_EMAIL=admin@example.com
 
 ## Next Steps
 
-1. **Fix Sudoers Configuration**
-   - Add `SETENV` tag to sudoers file in Dockerfile
-   - Rebuild MAAS image
+1. **Rebuild MAAS Image** ✅ Ready
+   - Sudoers configuration fixed with SETENV tag
+   - Rebuild command: `docker compose build maas`
 
 2. **Debug File Permissions**
-   - Verify `/etc/maas` mount is writable
+   - Verify `/etc/maas` mount is writable after rebuild
    - Check if SELinux/AppArmor is blocking writes
+   - Test: `docker exec maas-region touch /etc/maas/test.txt`
 
 3. **Test Initialization**
    - Once permissions fixed, MAAS should initialize successfully
@@ -204,7 +201,7 @@ This debugging session identified and fixed:
 - ✅ PostgreSQL network connectivity
 - ✅ PostgreSQL listen configuration
 - ✅ Directory structure and ownership
-- ⏳ Sudo configuration (needs SETENV tag)
-- ⏳ File write permissions (needs investigation)
+- ✅ Sudo configuration (SETENV tag added)
+- ⏳ File write permissions (needs investigation after rebuild)
 
-PostgreSQL is fully operational and accessible. MAAS initialization is blocked only by sudo/permission issues in the entrypoint script.
+PostgreSQL is fully operational and accessible. MAAS initialization should succeed after rebuilding with the sudo fix. Only potential remaining issue is file permissions.
