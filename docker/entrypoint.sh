@@ -217,6 +217,22 @@ main() {
     log_info "Configuring bind9 to run as maas user..."
     sed -i 's/-u bind/-u maas/' /etc/default/named
 
+    # Configure chrony systemd service for proper status reporting
+    # This fixes the "Dead" status in MAAS UI while chrony is actually running
+    log_info "Configuring chrony systemd service..."
+    mkdir -p /etc/systemd/system/chrony.service.d
+    cat > /etc/systemd/system/chrony.service.d/override.conf << 'EOF'
+[Service]
+Type=forking
+PIDFile=/run/chrony/chronyd.pid
+Restart=on-failure
+RestartSec=5
+EOF
+
+    # Ensure chrony PID directory exists with correct permissions
+    mkdir -p /run/chrony
+    chown ${MAAS_UID:-568}:${MAAS_GID:-568} /run/chrony
+
     # Check if initialization has already been completed
     # This marker file prevents re-initialization on container restarts
     local init_marker="/var/lib/maas/.initialized"
