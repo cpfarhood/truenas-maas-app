@@ -165,7 +165,7 @@ RUN mkdir -p /var/cache/bind /var/lib/bind /var/log/bind && \
     chown -R ${MAAS_UID}:${MAAS_GID} /var/cache/bind /var/lib/bind /var/log/bind /etc/bind && \
     chmod -R 755 /var/cache/bind /var/lib/bind /var/log/bind && \
     # Configure bind9 to run as maas user instead of bind user
-    sed -i 's/^OPTIONS=.*/OPTIONS="-u maas -4"/' /etc/default/named
+    sed -i 's/-u bind/-u maas/' /etc/default/named
 
 # Configure squid proxy to run as non-root
 RUN mkdir -p /var/log/squid /var/spool/squid && \
